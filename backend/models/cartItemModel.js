@@ -7,7 +7,7 @@ const CartItem = sequelize.define("CartItem", {
     quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
 })
 
-CartItem.sync({ alter: true })
+CartItem.sync()
     .then(() => console.log("CartItem model synced with DB"))
     .catch((err) => console.log("Error syncing cart item model:", err))
 

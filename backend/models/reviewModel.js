@@ -8,7 +8,7 @@ const Review = sequelize.define("Review", {
     comment: { type: DataTypes.TEXT },
 })
 
-Review.sync({ alter: true })
+Review.sync()
     .then(() => console.log("Review model synced with DB"))
     .catch((err) => console.log("Error syncing review model:", err))
 

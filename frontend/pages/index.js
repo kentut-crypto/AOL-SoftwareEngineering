@@ -105,7 +105,7 @@ export default function Marketplace() {
                     )}
                     <h2>{product.name}</h2>
                     <p>Price: Rp {Number(product.price).toLocaleString("id-ID")}</p>
-                    <img src={`${process.env.NEXT_PUBLIC_API_URL}${product.seller.imageUrl}`}
+                    <img src={product.seller.imageUrl.startsWith("http") ? product.seller.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${product.seller.imageUrl}`}
                       alt={product.seller.name}
                       style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8 }} />
                     <p>{product.seller.name}</p>

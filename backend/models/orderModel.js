@@ -10,7 +10,7 @@ const Order = sequelize.define("Order", {
     }
 })
 
-Order.sync({ alter: true })
+Order.sync()
     .then(() => console.log("Order model synced with DB"))
     .catch((err) => console.log("Error syncing order model:", err))
 

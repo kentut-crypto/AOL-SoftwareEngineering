@@ -6,7 +6,7 @@ const OrderItem = sequelize.define("OrderItem", {
     priceAtPurchase: { type: DataTypes.INTEGER, allowNull: false }
 })
 
-OrderItem.sync({ alter: true })
+OrderItem.sync()
     .then(() => console.log("OrderItem model synced with DB"))
     .catch((err) => console.log("Error syncing order item model:", err))
 

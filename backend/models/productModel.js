@@ -20,7 +20,7 @@ const Product = sequelize.define("Product", {
     rating: { type: DataTypes.FLOAT, defaultValue: 0.0 },
 })
 
-Product.sync({ alter: true })
+Product.sync()
     .then(() => console.log("Product model synced with DB"))
     .catch(err => console.log("Error syncing user model:", err))
 

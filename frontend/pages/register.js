@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext"
 export default function Register() {
     const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" })
     const router = useRouter()
-    const { user, setUser } = useAuth()
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
@@ -16,17 +15,11 @@ export default function Register() {
         e.preventDefault()
         try {
             const res = await axiosInstance.post("/auth/register", form)
-            setUser(res.data.user)
+            router.push("/login")
         } catch (error) {
             alert(error.response?.data?.message || "Registration failed")
         }
     }
-
-    useEffect(() => {
-        if (user) {
-            router.push("/")
-        }
-    }, [user])
 
     return (
         <main>
