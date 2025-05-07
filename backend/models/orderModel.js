@@ -5,13 +5,9 @@ const Order = sequelize.define("Order", {
     userId: { type: DataTypes.UUID, allowNull: false },
     totalPrice: DataTypes.INTEGER,
     status: {
-        type: DataTypes.STRING,
-        defaultValue: "completed"
+        type: DataTypes.ENUM("pending", "canceled", "completed"),
+        defaultValue: "pending"
     }
 })
-
-Order.sync()
-    .then(() => console.log("Order model synced with DB"))
-    .catch((err) => console.log("Error syncing order model:", err))
 
 module.exports = Order

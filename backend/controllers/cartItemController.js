@@ -39,7 +39,7 @@ const getCart = async (req, res) => {
                 {
                     model: Product,
                     as: "product",
-                    attributes: ["id", "name", "price", "imageUrl", "stock"]
+                    attributes: ["id", "name", "price", "imageUrl", "stock", "sellerId"]
                 }
             ]
         })
@@ -53,26 +53,6 @@ const clearCheckedItems = async (req, res) => {
     try {
         const userId = req.user.id
         const { productIds } = req.body
-
-        const cartItems = await CartItem.findAll({
-            where: {
-                userId,
-                productId: productIds
-            },
-            include: [
-                {
-                    model: Product,
-                    as: "product",
-                    attributes: ["id", "name", "price", "imageUrl", "stock"]
-                }
-            ]
-        })
-
-        for (const cartItem of cartItems) {
-            const product = cartItem.product
-            product.stock -= cartItem.quantity
-            await product.save()
-        }
 
         await CartItem.destroy({
             where: {

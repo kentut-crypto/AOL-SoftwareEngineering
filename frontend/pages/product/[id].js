@@ -156,10 +156,19 @@ export default function ProductDetail() {
                             </button>
                         </div>
                     ) : (
-                        <button onClick={() => {
-                            setReviewForm({ rating: 5, comment: "" })
-                            setShowReviewModal(true)
-                        }}>Leave a Review</button>
+                            <button onClick={async () => {
+                                try {
+                                    const res = await axiosInstance.get(`/reviews/eligible/${id}`)
+                                    if (!res.data.eligible) {
+                                        alert("You can only review this product after purchasing it")
+                                        return
+                                    }
+                                    setReviewForm({ rating: 5, comment: "" })
+                                    setShowReviewModal(true)
+                                } catch (err) {
+                                    alert("Failed to check review eligibility", err)
+                                }
+                            }}>Leave a Review</button>
                     )}
                 </section>
 

@@ -66,8 +66,12 @@ export default function CartPage() {
             .map(i => ({
                 productId: i.productId,
                 quantity: i.quantity,
-                price: i.product.price
+                price: i.product.price,
+                sellerId: i.product.sellerId
             }))
+
+            const uniqueSellers = new Set(itemsToBuy.map(i => i.sellerId))
+            if (uniqueSellers.size > 1) return alert("All items in a checkout must be from the same seller")
 
             await axiosInstance.post("/order", {
                 items: itemsToBuy,

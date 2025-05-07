@@ -50,6 +50,7 @@ export default function Navbar() {
                         {user.role === "seller" && (
                             <li>
                                 <Link href="/seller/products">Your Products</Link>
+                                <Link href="/seller/orders">Incoming Orders</Link>
                             </li>
                         )}
                         <li>
