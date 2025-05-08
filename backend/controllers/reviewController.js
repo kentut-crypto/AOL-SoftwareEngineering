@@ -2,7 +2,6 @@ const Review = require("../models/reviewModel")
 const Product = require("../models/productModel")
 const User = require("../models/userModel")
 const OrderItem = require("../models/orderItemModel")
-const { Op, Sequelize } = require("sequelize")
 const Order = require("../models/orderModel")
 
 const getReviewsByProductId = async (req, res) => {
@@ -52,9 +51,12 @@ const createReview = async (req, res) => {
         const hasPurchased = await OrderItem.findOne({
             where: {
                 productId: productId,
-                orderId: {
-                    [Op.in]: Sequelize.literal(`(SELECT id FROM "Orders" WHERE "userId" = '${userId}' AND "status" = 'completed')`)
-                }
+                status: "completed",
+            },
+            include: {
+                model: Order,
+                where: { userId },
+                as: "order"
             }
         })
 
@@ -96,9 +98,12 @@ const updateReview = async (req, res) => {
         const hasPurchased = await OrderItem.findOne({
             where: {
                 productId: productId,
-                orderId: {
-                    [Op.in]: Sequelize.literal(`(SELECT id FROM "Orders" WHERE "userId" = '${userId}' AND "status" = 'completed')`)
-                }
+                status: "completed",
+            },
+            include: {
+                model: Order,
+                where: { userId },
+                as: "order"
             }
         })
 
@@ -135,9 +140,12 @@ const deleteReview = async (req, res) => {
         const hasPurchased = await OrderItem.findOne({
             where: {
                 productId: productId,
-                orderId: {
-                    [Op.in]: Sequelize.literal(`(SELECT id FROM "Orders" WHERE "userId" = '${userId}' AND "status" = 'completed')`)
-                }
+                status: "completed",
+            },
+            include: {
+                model: Order,
+                where: { userId },
+                as: "order"
             }
         })
 
@@ -166,23 +174,19 @@ const eligible = async (req, res) => {
     const productId = req.params.productId
 
     try {
-        const orders = await Order.findAll({
+        const hasPurchased = await OrderItem.findOne({
             where: {
-                userId: req.user.id,
-                status: 'completed'
+                productId: productId,
+                status: "completed",
+            },
+            include: {
+                model: Order,
+                where: { userId },
+                as: "order"
             }
         })
 
-        const orderIds = orders.map(order => order.id)
-
-        const matchingItem = await OrderItem.findOne({
-            where: {
-                orderId: orderIds,
-                productId: req.params.productId
-            }
-        })
-
-        res.json({ eligible: !!matchingItem })
+        res.json({ eligible: !!hasPurchased })
     } catch (err) {
         console.error('Eligibility check failed:', err)
         res.status(500).json({ message: 'Internal server error' })

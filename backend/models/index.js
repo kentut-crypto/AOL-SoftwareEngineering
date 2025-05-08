@@ -9,10 +9,14 @@ const OrderItem = require("./orderItemModel")
 User.hasMany(Product, { foreignKey: "sellerId", targetKey: "id", as: "products" })
 Product.belongsTo(User, { foreignKey: "sellerId", targetKey: "id", as: "seller" })
 
-// Order belongs to User
+// Order
 Order.belongsTo(User, { foreignKey: "userId", as: "user" })
 Order.belongsToMany(Product, { through: OrderItem, as: "products", foreignKey: "orderId", otherKey: "productId" })
 Product.belongsToMany(Order, { through: OrderItem, as: "orders", foreignKey: "productId", otherKey: "orderId" })
+Order.hasMany(OrderItem, { foreignKey: 'orderId', as: 'orderItems' })
+OrderItem.belongsTo(Order, { foreignKey: 'orderId', as: 'order' })
+Product.hasMany(OrderItem, { foreignKey: 'productId', as: 'orderItems' })
+OrderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' })
 
 // User has many Reviews
 User.hasMany(Review, { foreignKey: "userId", targetKey: "id", as: "reviews" })

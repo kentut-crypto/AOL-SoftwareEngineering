@@ -8,16 +8,6 @@ const createOrder = async (req, res) => {
     const { items, totalPrice } = req.body
 
     try {
-
-        const sellerId = items[0].productId ? (await Product.findByPk(items[0].productId)).sellerId : null
-
-        for (let item of items) {
-            const product = await Product.findByPk(item.productId)
-            if (product.sellerId !== sellerId) {
-                return res.status(400).json({ message: "All products in the order must be from the same seller" })
-            }
-        }
-
         const order = await Order.create({ userId, totalPrice })
 
         await Promise.all(items.map(async item => {
@@ -49,7 +39,7 @@ const getOrderHistory = async (req, res) => {
             include: {
                 model: Product,
                 as: "products",
-                through: { attributes: ["quantity", "priceAtPurchase"] },
+                through: { attributes: ["quantity", "priceAtPurchase", "status"] },
                 attributes: ["id", "name", "price", "imageUrl"]
             },
             order: [["createdAt", "DESC"]]
@@ -68,16 +58,20 @@ const getSellerPendingOrders = async (req, res) => {
 
     try {
         const orders = await Order.findAll({
-            where: { status: "pending" },
             include: [
                 {
-                    model: Product,
-                    as: "products",
-                    where: { sellerId: sellerId },
-                    attributes: ["id", "name", "price", "imageUrl"],
-                    through: {
-                        attributes: ["quantity", "priceAtPurchase"]
-                    }
+                    model: OrderItem,
+                    as: "orderItems",
+                    where: { status: "pending" },
+                    include: [
+                        {
+                            model: Product,
+                            as: "product",
+                            where: { sellerId: sellerId },
+                            attributes: ["id", "name", "price", "imageUrl"]
+                        }
+                    ],
+                    attributes: ["quantity", "priceAtPurchase", "status"]
                 },
                 {
                     model: User,
@@ -96,42 +90,32 @@ const getSellerPendingOrders = async (req, res) => {
 }
 
 const acceptOrderItem = async (req, res) => {
-    const { orderId } = req.params
+    const { orderId, productId } = req.params
     const sellerId = req.user.id
 
     if(req.user.role !== "seller") return res.status(403).json({ message: "Only sellers can manage orders" })
 
     try {
-        const order = await Order.findByPk(orderId, {
+        const product = await Product.findByPk(productId)
+        if (!product || product.sellerId !== sellerId) return res.status(403).json({ message: "Unauthorized or product not found" })
+
+        const orderItem = await OrderItem.findOne({
+            where: { orderId, productId },
             include: {
                 model: Product,
-                as: "products",
-                through: { attributes: ["quantity"] }
+                as: "product"
             }
         })
 
-        if (!order) return res.status(404).json({ message: "Order not found" })
+        if (!orderItem || orderItem.status !== "pending") return res.status(400).json({ message: "Invalid or already processed item" })
 
-        const unauthorizedProduct = order.products.find(product => product.sellerId !== sellerId)
-        if (unauthorizedProduct) return res.status(403).json({ message: "Unauthorized order" })
+        if (product.stock < orderItem.quantity) return res.status(400).json({ message: "Not enough stock" })
 
-        for (const product of order.products) {
-            const orderItem = product.OrderItem
-            if (product.stock < orderItem.quantity) {
-                return res.status(400).json({
-                    message: `Not enough stock for product: ${product.name}`
-                })
-            }
-        }
+        product.stock -= orderItem.quantity
+        await product.save()
 
-        for (const product of order.products) {
-            const orderItem = product.OrderItem
-            product.stock -= orderItem.quantity
-            await product.save()
-        }
-
-        order.status = "completed"
-        await order.save()
+        orderItem.status = "completed"
+        await orderItem.save()
 
         res.json({ message: "Order accepted and stock updated" })    
     } catch (err) {
@@ -141,27 +125,20 @@ const acceptOrderItem = async (req, res) => {
 }
 
 const cancelOrderItem = async (req, res) => {
-    const { orderId } = req.params
+    const { orderId, productId } = req.params
     const sellerId = req.user.id
 
     if(req.user.role !== "seller") return res.status(403).json({ message: "Only sellers can manage orders" })
 
     try {
-        const order = await Order.findByPk(orderId, {
-            include: {
-                model: Product,
-                as: "products",
-                through: { attributes: [] }
-            }
-        })
+        const product = await Product.findByPk(productId)
+        if (!product || product.sellerId !== sellerId) return res.status(403).json({ message: "Unauthorized or product not found" })
+        
+        const orderItem = await OrderItem.findOne({ where: { orderId, productId } })
+        if (!orderItem || orderItem.status !== "pending") return res.status(400).json({ message: "Invalid or already processed item" })
 
-        if (!order) return res.status(404).json({ message: "Order not found" })
-
-        const unauthorizedProduct = order.products.find(product => product.sellerId !== sellerId)
-        if (unauthorizedProduct) return res.status(403).json({ message: "Unauthorized order" })
-
-        order.status = "canceled"
-        await order.save()
+        orderItem.status = "canceled"
+        await orderItem.save()
 
         res.json({ message: "Order canceled" })
     } catch (err) {
