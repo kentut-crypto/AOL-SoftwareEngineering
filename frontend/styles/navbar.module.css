@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  gap: 1rem;
+  text-decoration: none; /* Latar putih */ /* Ruang dalam */
+  border-bottom: 1px solid #e5e5e5; /* Garis bawah halus */
+  color: black;
+}
+
+.container a {
+  text-decoration: none;
+  list-style: none;
+  color: black;
+}
+
+.container li {
+  list-style: none;
+  padding: 0.5rem;
+  border-radius: 10px;
+  color: black;
+}
+
+.container a:hover {
+  background-color: #7cdf83;
+  color: #028a0b;
+  padding: 0.5rem;
+  border-radius: 10px;
+}
