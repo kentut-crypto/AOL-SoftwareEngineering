@@ -1,8 +1,8 @@
 .container {
   display: flex;
   gap: 1rem;
-  text-decoration: none; /* Latar putih */ /* Ruang dalam */
-  border-bottom: 1px solid #e5e5e5; /* Garis bawah halus */
+  text-decoration: none;
+  border-bottom: 1px solid #e5e5e5;
   color: black;
 }
 
@@ -10,11 +10,11 @@
   text-decoration: none;
   list-style: none;
   color: black;
+  padding: 0.5rem;
 }
 
 .container li {
   list-style: none;
-  padding: 0.5rem;
   border-radius: 10px;
   color: black;
 }
@@ -22,6 +22,42 @@
 .container a:hover {
   background-color: #7cdf83;
   color: #028a0b;
+  border-radius: 10px;
+}
+
+.customer {
+  display: flex;
+  gap: 1rem;
+  text-decoration: none;
+  border-bottom: 1px solid #e5e5e5;
+  color: black;
+}
+
+.customer a {
+  text-decoration: none;
+  list-style: none;
+  color: black;
+  padding: 0.5rem;
+}
+
+.customer li {
+  list-style: none;
+  border-radius: 10px;
+  color: black;
+}
+
+.customer a:hover {
+  background-color: #7cdf83;
+  color: #028a0b;
   padding: 0.5rem;
   border-radius: 10px;
+}
+
+.customer button {
+  background-color: #dc7210;
+  color: #000000;
+  border-radius: 10px;
+  padding: 0.5rem;
+  border: none;
+  cursor: pointer;
 }

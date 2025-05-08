@@ -43,7 +43,7 @@ export default function Navbar() {
                 <Link href="/seller/orders">Incoming Orders</Link>
               </li>
             )}
-            <li>
+            <li className={styles.customer}>
               <Link href="/cart">Cart</Link>
               <Link href="/history">Purchase History</Link>
               <button onClick={handleLogout}>Logout</button>
