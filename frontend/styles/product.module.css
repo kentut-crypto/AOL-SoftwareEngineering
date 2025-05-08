@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.container button {
+  background-color: #dc7210;
+  color: #000000;
+  border-radius: 10px;
+  padding: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.container .pages button {
+  background-color: #7a83e5;
+  color: #000000;
+  border-radius: 10px;
+  padding: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.container ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}

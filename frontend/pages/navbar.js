@@ -38,7 +38,7 @@ export default function Navbar() {
         ) : (
           <>
             {user.role === "seller" && (
-              <li>
+              <li className={styles.customer}>
                 <Link href="/seller/products">Your Products</Link>
                 <Link href="/seller/orders">Incoming Orders</Link>
               </li>

@@ -77,8 +77,8 @@ export default function Marketplace() {
                 >
                   <Link href={`/product/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                     {product.imageUrl && (
-                      <div style={{ margin: "0.5rem 0" }}>
-                        <img src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`} alt={product.name} style={{ width: "500px", height: "200px", objectFit: "cover" }} />
+                      <div className={styles.imageProduct}>
+                        <img src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`} alt={product.name} className={styles.image} />
                       </div>
                     )}
                     <h2>{product.name}</h2>

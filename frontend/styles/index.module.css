@@ -20,3 +20,19 @@
   border: none;
   cursor: pointer;
 }
+
+.imageProduct {
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-radius: 4px;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imageProduct img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
