@@ -7,7 +7,7 @@ import Link from "next/link"
 export default function ProductDetail() {
     const router = useRouter()
     const { id } = router.query
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
 
     const [product, setProduct] = useState(null)
 
@@ -20,6 +20,12 @@ export default function ProductDetail() {
     const [myReview, setMyReview] = useState(null)
     const [showReviewModal, setShowReviewModal] = useState(false)
     const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" })
+
+    useEffect(() => {
+        if (!loading && user?.role === "admin") {
+            router.replace("/admin/users")
+        }
+    }, [loading, user, router])
 
     useEffect(() => {
         if (!id) return
@@ -68,6 +74,7 @@ export default function ProductDetail() {
         }
     }
 
+    if (loading || user?.role === "admin") return null
     if (!product) return <p>Loading...</p>
 
     return (
@@ -110,7 +117,18 @@ export default function ProductDetail() {
                             –
                         </button>
 
-                        <span>{quantity}</span>
+                        <input
+                            type="number"
+                            value={quantity}
+                            min="1"
+                            max={product.stock}
+                            onChange={e => {
+                                let value = parseInt(e.target.value)
+                                if (isNaN(value) || value < 1) value = 1
+                                if (value > product.stock) value = product.stock
+                                setQuantity(value)
+                            }}
+                        />
 
                         <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} disabled={quantity >= product.stock}>
                             +

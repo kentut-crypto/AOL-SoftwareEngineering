@@ -1,17 +1,25 @@
 import React, { useEffect, useRef, useState } from "react"
 import axiosInstance from "../axiosInstance"
 import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/router"
 
 export default function CartPage() {
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
     const [cartItems, setCartItems] = useState([])
     const [checkedItems, setCheckedItems] = useState([])
     const [isCalculatingTotal, setIsCalculatingTotal] = useState(false)
     const [total, setTotal] = useState(0)
     const [isDebouncing, setIsDebouncing] = useState(false)
+    const router = useRouter()
 
     const debounceTimeout = useRef({})
     const calcTimeout = useRef(null)
+
+    useEffect(() => {
+        if (!loading && user?.role === "admin") {
+            router.replace("/admin/users")
+        }
+    }, [loading, user, router])
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -115,6 +123,8 @@ export default function CartPage() {
             setCheckedItems(checkedItems.filter(id => id !== productId))
         }
     }
+
+    if (loading || user?.role === "admin") return null
 
     return (
         <div>

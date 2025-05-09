@@ -25,11 +25,7 @@ export default function Navbar() {
                             ) : null}
                             <h1 style={{ margin: 0, fontSize: "1.2rem" }}>
                                 Welcome{" "}
-                                {user?.name
-                                    ? user.name
-                                    : user?.email
-                                        ? user.email
-                                        : "Guest"}
+                                {user?.name || user?.email || "Guest"}
                             </h1>
                         </>
                     )}
@@ -45,6 +41,13 @@ export default function Navbar() {
                             <Link href="/register">Register</Link>
                         </li>
                     </>
+                ) : user.role === "admin" ? (
+                    <>
+                        <li><Link href="/admin/products">Products</Link></li>
+                        <li><Link href="/admin/users">Users</Link></li>
+                        <li><Link href="/admin/topups">Top-Ups</Link></li>
+                        <li><button onClick={handleLogout}>Logout</button></li>
+                    </>        
                 ) : (
                     <>
                         {user.role === "seller" && (

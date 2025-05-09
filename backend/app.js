@@ -8,6 +8,7 @@ const productRoutes = require("./routes/productRoutes")
 const reviewRoutes = require("./routes/reviewRoutes")
 const cartItemRoutes = require("./routes/cartItemRoutes")
 const orderRoutes = require("./routes/orderRoutes")
+const topUpRoutes = require("./routes/topUpRequestRoutes")
 const path = require("path")
 const cookieParser = require("cookie-parser")
 
@@ -25,6 +26,7 @@ app.use("/api/products", productRoutes)
 app.use("/api/reviews", reviewRoutes)
 app.use("/api/cart", cartItemRoutes)
 app.use("/api/order", orderRoutes)
+app.use("/api/topup", topUpRoutes)
 
 require("./models")
 

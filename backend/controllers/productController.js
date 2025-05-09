@@ -57,6 +57,54 @@ const getAllProducts = async (req, res) => {
     }
 }
 
+const getAllProductAdmin = async (req, res) => {
+    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied: Admins only" })
+
+    try {
+        const page = Math.max(parseInt(req.query.page) || 1, 1)
+        const limit = 10
+        const offset = (page - 1) * limit
+        const { minPrice, maxPrice, search, sort, disease } = req.query
+
+        const where = {}
+        if (minPrice) where.price = { ...(where.price || {}), [Op.gte]: parseFloat(minPrice) }
+        if (maxPrice) where.price = { ...(where.price || {}), [Op.lte]: parseFloat(maxPrice) }
+        if (search) where.name = { [Op.iLike]: `%${search}%` }
+        if (disease) where.diseaseTargets = { [Op.contains]: [disease] }
+
+        let order = [["createdAt", "DESC"]] // default newest first
+        if (sort === "price_asc")  order = [["price",  "ASC"]]
+        if (sort === "price_desc") order = [["price",  "DESC"]]
+        if (sort === "rating_asc") order = [["rating", "ASC"]]
+        if (sort === "rating_desc")order = [["rating", "DESC"]]
+
+        const { count, rows } = await Product.findAndCountAll({
+            where,
+            order,
+            limit,
+            offset,
+            include: [
+                {
+                    model: User,
+                    as: "seller",
+                    attributes: ["id", "name", "imageUrl"]
+                }
+            ]
+        })
+
+        res.json({
+            meta: {
+                total: count,
+                page,
+                lastPage: Math.ceil(count / limit)
+            },
+            data: rows
+        })
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch products", error: err.message })
+    }
+}
+
 const getProductById = async (req, res) => {
     try {
         const product = await Product.findByPk(req.params.id, {
@@ -197,7 +245,18 @@ const deleteProduct = async (req, res) => {
 
         await Review.destroy({ where: { productId: id } })
         await CartItem.destroy({ where: { productId: id } })
+
+        const orderItems = await OrderItem.findAll({ where: { productId: id } })
+        const affectedOrderIds = [...new Set(orderItems.map(item => item.orderId))]
+
         await OrderItem.destroy({ where: { productId: id } })
+
+        for (const orderId of affectedOrderIds) {
+            const remaining = await OrderItem.count({ where: { orderId } })
+            if (remaining === 0) {
+                await Order.destroy({ where: { id: orderId } })
+            }
+        }
 
         if (product.imageUrl) {
             const imagePath = path.join(__dirname, "../uploads/products", path.basename(product.imageUrl))
@@ -220,4 +279,5 @@ module.exports = {
     createProduct,
     updateProduct,
     deleteProduct,
+    getAllProductAdmin
 }

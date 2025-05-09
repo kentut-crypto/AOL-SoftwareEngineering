@@ -4,6 +4,7 @@ const Order = require("./orderModel")
 const Review = require("./reviewModel")
 const CartItem = require("./cartItemModel")
 const OrderItem = require("./orderItemModel")
+const TopUpRequest = require("./topUpRequestModel")
 
 // User has many Products
 User.hasMany(Product, { foreignKey: "sellerId", targetKey: "id", as: "products" })
@@ -33,6 +34,9 @@ CartItem.belongsTo(User, { foreignKey: "userId", targetKey: "id", as: "user" })
 // Product has many CartItems
 Product.hasMany(CartItem, { foreignKey: "productId", targetKey: "id", as: "cartItems" })
 CartItem.belongsTo(Product, { foreignKey: "productId", targetKey: "id", as: "product" })
+
+// TopUpRequest belongs to User
+TopUpRequest.belongsTo(User, { foreignKey: "userId", targetKey: "id", as: "user" })
 
 module.exports = {
   User,

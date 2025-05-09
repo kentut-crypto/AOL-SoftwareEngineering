@@ -2,8 +2,10 @@ import { useEffect, useState } from "react"
 import axiosInstance from "@/axiosInstance"
 import Link from "next/link"
 import { useRouter } from "next/router"
+import { useAuth } from "@/context/AuthContext"
 
 export default function SellerPage() {
+    const { user, loading } = useAuth()
     const router = useRouter()
     const { id } = router.query
     const [seller, setSeller] = useState(null)
@@ -15,6 +17,12 @@ export default function SellerPage() {
     const [disease, setDisease] = useState("")
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
+
+    useEffect(() => {
+        if (!loading && user?.role === "admin") {
+            router.replace("/admin/users")
+        }
+    }, [loading, user, router])
 
     const fetchProducts = async () => {
         try {
@@ -40,6 +48,8 @@ export default function SellerPage() {
     useEffect(() => {
         if (id) fetchProducts()
     }, [id, page, sort])
+
+    if (loading || user?.role === "admin") return null
 
     return (
         <main style={{ padding: "1rem" }}>

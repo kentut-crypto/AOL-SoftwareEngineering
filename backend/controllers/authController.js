@@ -7,6 +7,8 @@ const Order = require("../models/orderModel")
 const OrderItem = require("../models/orderItemModel")
 const Product = require("../models/productModel")
 const Review = require("../models/reviewModel")
+const fs = require("fs")
+const path = require("path")
 
 const generateToken = (user) => {
     return jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {expiresIn: "3d",}) // 3 day aja kali ya
@@ -127,6 +129,8 @@ const getMe = async (req, res) => {
 }
 
 const getAllUsers = async (req, res) => {
+    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied: Admins only" })
+        
     try {
         const users = await User.findAll({ attributes: { exclude: ["password"] } })
         res.json({ data: users })
@@ -139,6 +143,8 @@ const updateUser = async (req, res) => {
     const { id } = req.params
     const { name, role } = req.body
 
+    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied: Admins only" })
+
     try {
         const user = await User.findByPk(id)
         if (!user) return res.status(404).json({ message: "User not found" })
@@ -147,7 +153,7 @@ const updateUser = async (req, res) => {
         user.role = role || user.role
 
         if (req.file) {
-            if (user.imageUrl && user.imageUrl !== "/uploads/users/default.jpg") {
+            if (user.imageUrl && user.imageUrl !== "/uploads/users/default.jpg" && !user.imageUrl.startsWith("http")) {
                 const oldImagePath = path.join(__dirname, "../uploads/users", path.basename(user.imageUrl))
                 fs.unlink(oldImagePath, (err) => {
                     if (err) console.error("Failed to delete old user image:", err.message)
@@ -165,6 +171,8 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     const { id } = req.params
+
+    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied: Admins only" })
 
     try {
         const user = await User.findByPk(id)

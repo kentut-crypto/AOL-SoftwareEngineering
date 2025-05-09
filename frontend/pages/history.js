@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react"
 import axiosInstance from "../axiosInstance"
+import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/router"
 
 export default function OrderHistory() {
     const [orders, setOrders] = useState([])
+    const { user, loading } = useAuth()
+    const router = useRouter()
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -15,6 +19,14 @@ export default function OrderHistory() {
         }
         fetchOrders()
     }, [])
+
+    useEffect(() => {
+        if (!loading && user?.role === "admin") {
+            router.replace("/admin/users")
+        }
+    }, [loading, user, router])
+
+    if (loading || user?.role === "admin") return null
 
     return (
         <div>
