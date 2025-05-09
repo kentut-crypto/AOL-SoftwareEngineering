@@ -26,11 +26,10 @@ export default function OrderHistory() {
                     <div key={order.id}>
                         <h3>Order ID: {order.id}</h3>
                         <p>Total Price: Rp {Number(order.totalPrice).toLocaleString("id-ID")}</p>
-                        <p>Status: {order.status}</p>
                         <ul>
                             {order.products.map(product => (
                                 <li key={product.id}>
-                                    {product.name} : {product.OrderItem.quantity} x Rp{Number(product.OrderItem.priceAtPurchase).toLocaleString("id-ID")}
+                                    {product.name} : {product.OrderItem.quantity} x Rp{Number(product.OrderItem.priceAtPurchase).toLocaleString("id-ID")} - Status: {product.OrderItem.status}
                                 </li>
                             ))}
                         </ul>

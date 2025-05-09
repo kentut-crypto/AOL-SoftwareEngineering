@@ -20,19 +20,19 @@ export default function Orders() {
         }
     }
 
-    const handleAccept = async (orderId) => {
+    const handleAccept = async (orderId, productId) => {
         try {
-            await axiosInstance.patch(`/order/accept/${orderId}`)
-            setOrders(orders => orders.filter(order => order.id !== orderId))
+            await axiosInstance.patch(`/order/accept/${orderId}/${productId}`)
+            fetchOrders()
         } catch (err) {
             console.error("Accept failed", err)
         }
     }
 
-    const handleDecline = async (orderId) => {
+    const handleDecline = async (orderId, productId) => {
         try {
-            await axiosInstance.patch(`/order/cancel/${orderId}`)
-            setOrders(orders => orders.filter(order => order.id !== orderId))
+            await axiosInstance.patch(`/order/cancel/${orderId}/${productId}`)
+            fetchOrders()
         } catch (err) {
             console.error("Decline failed", err)
         }
@@ -57,24 +57,26 @@ export default function Orders() {
             {orders.map(order => (
                 <div key={order.id}>
                     <p>Customer: {order.user.name}</p>
-                    {order.products.map(product => (
-                        <div key={product.id}>
-                            <img src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`} alt={product.name}/>
+                    {order.orderItems.map(item => (
+                        <div key={item.id} style={{ display: "flex", marginBottom: 8 }}>
+                            <img
+                                src={`${process.env.NEXT_PUBLIC_API_URL}${item.product.imageUrl}`}
+                                alt={item.product.name}
+                                style={{ width: 80, height: 80, objectFit: "cover", marginRight: 12 }}
+                            />
                             <div>
-                                <p>{product.name}</p>
-                                <p>Qty: {product.OrderItem.quantity}</p>
-                                <p>Price: ${product.OrderItem.priceAtPurchase}</p>
+                                <p><strong>{item.product.name}</strong></p>
+                                <p>Qty: {item.quantity}</p>
+                                <p>Price: ${item.priceAtPurchase}</p>
+                                <button onClick={() => handleAccept(order.id, item.product.id)} disabled={item.status !== "pending"}>
+                                    Accept
+                                </button>
+                                <button onClick={() => handleDecline(order.id, item.product.id)} disabled={item.status !== "pending"}>
+                                    Decline
+                                </button>
                             </div>
                         </div>
                     ))}
-                    <div>
-                        <button onClick={() => handleAccept(order.id)}>
-                            Accept
-                        </button>
-                        <button onClick={() => handleDecline(order.id)}>
-                            Decline
-                        </button>
-                    </div>
                 </div>
             ))}
         </div>

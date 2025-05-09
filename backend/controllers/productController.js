@@ -4,6 +4,10 @@ const jwt   = require("jsonwebtoken")
 const fs = require("fs")
 const path = require("path")
 const User = require("../models/userModel")
+const CartItem = require("../models/cartItemModel")
+const Order = require("../models/orderModel")
+const OrderItem = require("../models/orderItemModel")
+const Review = require("../models/reviewModel")
 
 const getAllProducts = async (req, res) => {
     try {
@@ -158,15 +162,12 @@ const createProduct = async (req, res) => {
 }
 
 const updateProduct = async (req, res) => {
-    if (req.user.role !== "seller") {
-        return res.status(403).json({ message: "Only sellers can update products" })
-    }
     const { id } = req.params
     try {
         const product = await Product.findByPk(id)
         if (!product) return res.status(404).json({ message: "Product not found" })
 
-        if (product.sellerId !== req.user.id) return res.status(403).json({ message: "Not authorized to update this product" })
+        if (product.sellerId !== req.user.id && req.user.role !== "admin") return res.status(403).json({ message: "Not authorized to update this product" })
 
         const updates = { ...req.body }
         if (req.file) {
@@ -187,15 +188,16 @@ const updateProduct = async (req, res) => {
 }
 
 const deleteProduct = async (req, res) => {
-    if (req.user.role !== "seller") {
-        return res.status(403).json({ message: "Only sellers can delete products" })
-    }
     const { id } = req.params
     try {
         const product = await Product.findByPk(id)
         if (!product) return res.status(404).json({ message: "Product not found" })
 
-        if (product.sellerId !== req.user.id) return res.status(403).json({ message: "Not authorized to delete this product" })
+        if (product.sellerId !== req.user.id && req.user.role !== "admin") return res.status(403).json({ message: "Not authorized to delete this product" })
+
+        await Review.destroy({ where: { productId: id } })
+        await CartItem.destroy({ where: { productId: id } })
+        await OrderItem.destroy({ where: { productId: id } })
 
         if (product.imageUrl) {
             const imagePath = path.join(__dirname, "../uploads/products", path.basename(product.imageUrl))

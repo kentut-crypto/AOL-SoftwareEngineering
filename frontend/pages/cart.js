@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react"
 import axiosInstance from "../axiosInstance"
+import { useAuth } from "@/context/AuthContext"
 
 export default function CartPage() {
+    const { user } = useAuth()
     const [cartItems, setCartItems] = useState([])
     const [checkedItems, setCheckedItems] = useState([])
     const [isCalculatingTotal, setIsCalculatingTotal] = useState(false)
@@ -60,6 +62,10 @@ export default function CartPage() {
     }
 
     const handleCheckout = async () => {
+        if (user.money < total) {
+            alert("Insufficient balance")
+            return
+        }
         try {
             const itemsToBuy = cartItems
             .filter(i => checkedItems.includes(i.productId))
@@ -67,11 +73,7 @@ export default function CartPage() {
                 productId: i.productId,
                 quantity: i.quantity,
                 price: i.product.price,
-                sellerId: i.product.sellerId
             }))
-
-            const uniqueSellers = new Set(itemsToBuy.map(i => i.sellerId))
-            if (uniqueSellers.size > 1) return alert("All items in a checkout must be from the same seller")
 
             await axiosInstance.post("/order", {
                 items: itemsToBuy,
@@ -144,9 +146,12 @@ export default function CartPage() {
                                             value={item.quantity}
                                             min="1"
                                             max={item.product.stock}
-                                            onChange={e =>
-                                                handleQuantityChange(item.id, parseInt(e.target.value))
-                                            }
+                                            onChange={e => {
+                                                let value = parseInt(e.target.value)
+                                                if (isNaN(value) || value < 1) value = 1
+                                                if (value > item.product.stock) value = item.product.stock
+                                                handleQuantityChange(item.id, value)
+                                            }}
                                         />
                                         <button onClick={() => handleQuantityChange(item.id, item.quantity + 1)} disabled={item.quantity >= item.product.stock}>
                                             +

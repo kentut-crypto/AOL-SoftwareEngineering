@@ -56,6 +56,7 @@ export default function Navbar() {
                         <li>
                             <Link href="/cart">Cart</Link>
                             <Link href="/history">Purchase History</Link>
+                            <h1>Money : {user.money}</h1>
                             <button onClick={handleLogout}>Logout</button>
                         </li>
                     </>

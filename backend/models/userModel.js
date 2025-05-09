@@ -18,9 +18,10 @@ const User = sequelize.define("User", {
         allowNull: false,
         defaultValue: "/uploads/users/default.jpg"
     },
+    money: { type: DataTypes.FLOAT, defaultValue: 0.0, allowNull: false }
 })
 
-User.sync()
+User.sync({ alter: true })
     .then(() => console.log("User model synced with DB"))
     .catch(err => console.log("Error syncing user model:", err))
 

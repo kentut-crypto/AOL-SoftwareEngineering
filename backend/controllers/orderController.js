@@ -111,13 +111,25 @@ const acceptOrderItem = async (req, res) => {
 
         if (product.stock < orderItem.quantity) return res.status(400).json({ message: "Not enough stock" })
 
+        const order = await Order.findByPk(orderId)
+        if (!order) return res.status(404).json({ message: "Order not found" })
+
+        const buyer = await User.findByPk(order.userId)
+        if (!buyer) return res.status(404).json({ message: "Buyer not found" })
+
+        const totalCost = orderItem.quantity * orderItem.priceAtPurchase
+        if (buyer.money < totalCost) return res.status(400).json({ message: "Buyer has insufficient balance" })
+        
+        buyer.money -= totalCost
+        await buyer.save()
+
         product.stock -= orderItem.quantity
         await product.save()
 
         orderItem.status = "completed"
         await orderItem.save()
 
-        res.json({ message: "Order accepted and stock updated" })    
+        res.json({ message: "Order accepted, stock and balance updated" }) 
     } catch (err) {
         console.error(err)
         res.status(500).json({ message: "Failed to accept order", error: err.message })

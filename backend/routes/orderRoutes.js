@@ -6,7 +6,7 @@ const { createOrder, getOrderHistory, getSellerPendingOrders, acceptOrderItem, c
 router.get("/", verifyTokenFromCookie, getOrderHistory)
 router.post("/", verifyTokenFromCookie, createOrder)
 router.get("/seller/getPendingOrders", verifyTokenFromCookie, getSellerPendingOrders)
-router.patch("/accept/:orderId", verifyTokenFromCookie, acceptOrderItem)
-router.patch("/cancel/:orderId", verifyTokenFromCookie, cancelOrderItem)
+router.patch("/accept/:orderId/:productId", verifyTokenFromCookie, acceptOrderItem)
+router.patch("/cancel/:orderId/:productId", verifyTokenFromCookie, cancelOrderItem)
 
 module.exports = router

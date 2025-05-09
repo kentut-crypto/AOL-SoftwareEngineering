@@ -75,6 +75,7 @@ const createReview = async (req, res) => {
         const allReviews = await Review.findAll({ where: { productId } })
         const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
         product.rating = avgRating.toFixed(1)
+        product.reviewCount = allReviews.length
         await product.save()
 
         res.status(201).json(review)
@@ -120,6 +121,7 @@ const updateReview = async (req, res) => {
         const allReviews = await Review.findAll({ where: { productId } })
         const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
         product.rating = avgRating.toFixed(1)
+        product.reviewCount = allReviews.length
         await product.save()
 
         res.status(200).json(existingReview)
@@ -160,6 +162,7 @@ const deleteReview = async (req, res) => {
         const allReviews = await Review.findAll({ where: { productId } })
         const avgRating = allReviews.length > 0 ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length : 0
         product.rating = avgRating.toFixed(1)
+        product.reviewCount = allReviews.length
         await product.save()
 
         res.status(200).json({ message: "Review deleted successfully" })
