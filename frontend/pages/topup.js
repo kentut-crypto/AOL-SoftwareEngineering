@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import axiosInstance from "@/axiosInstance"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/router"
+import styles from "../styles/topup.module.css"
 
 export default function TopUpPage() {
     const { user, loading } = useAuth()
@@ -58,17 +59,19 @@ export default function TopUpPage() {
     }
 
     return (
-        <div style={{ padding: "2rem" }}>
-            <h1>My Top-Up History</h1>
-            <button onClick={() => setIsModalOpen(true)} style={{ marginBottom: "1rem" }}>
+        <div className={styles.container}>
+            <h1 className={styles.title}>Top-Up Balance</h1>
+            <button className={styles.topUpButton} onClick={() => setIsModalOpen(true)}>
                 Request Top-Up
             </button>
+
+            <h2 className={styles.historyTitle}>Top-Up History</h2>
 
             {history.length === 0 ? (
                 <p>No top-up history yet.</p>
             ) : (
                 history.map((t) => (
-                    <div key={t.id} style={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "0.5rem", borderRadius: "6px" }}>
+                    <div key={t.id} className={styles.historyCard}>
                         <p>Amount: <strong>Rp {t.amount.toLocaleString()}</strong></p>
                         <p>Status: <strong>{t.status}</strong></p>
                         <p>Date: {new Date(t.createdAt).toLocaleString()}</p>
@@ -77,26 +80,15 @@ export default function TopUpPage() {
             )}
 
             {isModalOpen && (
-                <div style={{
-                    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    display: "flex", justifyContent: "center", alignItems: "center",
-                    zIndex: 1000
-                }}>
-                    <div style={{ background: "white", padding: "2rem", borderRadius: "10px", width: "300px" }}>
-                        <h2>Top-Up Amount</h2>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem" }}>
+                <div className={styles.modal}>
+                    <div className={styles.modalContent}>
+                        <h2 className={styles.modalTitle}>Top-Up Amount</h2>
+                        <div className={styles.amounts}>
                             {presetAmounts.map((amt) => (
                                 <div
                                     key={amt}
                                     onClick={() => handlePresetClick(amt)}
-                                    style={{
-                                        padding: "0.5rem 1rem",
-                                        border: "1px solid #333",
-                                        borderRadius: "6px",
-                                        backgroundColor: selectedAmount === amt ? "#d1e7dd" : "white",
-                                        cursor: "pointer"
-                                    }}
+                                    className={`${styles.amountOption} ${selectedAmount === amt ? styles.selected : ""}`}
                                 >
                                     Rp {amt.toLocaleString()}
                                 </div>
@@ -107,11 +99,11 @@ export default function TopUpPage() {
                             placeholder="Or enter manually"
                             value={manualAmount}
                             onChange={handleManualChange}
-                            style={{ width: "100%", marginBottom: "1rem", padding: "0.5rem" }}
+                            className={styles.manualInput}
                         />
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                            <button onClick={handleSubmit}>Top Up</button>
-                            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+                        <div className={styles.modalButtons}>
+                            <button className={styles.submitButton} onClick={handleSubmit}>Top Up</button>
+                            <button className={styles.cancelButton} onClick={() => setIsModalOpen(false)}>Cancel</button>
                         </div>
                     </div>
                 </div>

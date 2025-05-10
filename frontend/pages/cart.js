@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react"
 import axiosInstance from "../axiosInstance"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/router"
+import styles from '../styles/cart.module.css';
 
 export default function CartPage() {
     const { user, loading } = useAuth()
@@ -92,7 +93,7 @@ export default function CartPage() {
                 data: { productIds: checkedItems }
             })
             setCartItems(items => items.filter(i => !checkedItems.includes(i.productId)))
-            setCheckedItems([])
+            setCheckedItems([]) 
         } catch (err) {
             console.error("Checkout failed", err)
         }
@@ -127,71 +128,85 @@ export default function CartPage() {
     if (loading || user?.role === "admin") return null
 
     return (
-        <div>
-            <h1>Shopping Cart</h1>
+        <div className={styles.cartContainer}>
+            <h1 className={styles.cartHeader}>Shopping Cart</h1>
             {cartItems.length === 0 ? (
                 <p>Your cart is empty</p>
             ) : (
-                <div>
-                    <div>
-                        {cartItems.map(item => (
-                            <div key={item.id}>
+                <div className={styles.cartItemContainer}>
+                    {cartItems.map(item => (
+                        <div key={item.id} className={styles.cartItem}>
+                            <div className={styles.cartItemDetails}>
                                 <input
                                     type="checkbox"
                                     checked={checkedItems.includes(item.productId)}
                                     onChange={e =>
                                         handleCheckboxChange(item.productId, e.target.checked)
                                     }
+                                    className={styles.checkbox}
                                 />
-                                <img src={`${process.env.NEXT_PUBLIC_API_URL}${item.product.imageUrl}`} alt={item.product.name} />
-                                <div>
+                                <img 
+                                    src={`${process.env.NEXT_PUBLIC_API_URL}${item.product.imageUrl}`} 
+                                    alt={item.product.name} 
+                                    className={styles.cartItemImage}
+                                />
+                                <div className={styles.cartItemInfo}>
                                     <h3>{item.product.name}</h3>
-                                    <p>{Number(item.product.price).toLocaleString("id-ID")}</p>
-                                    <div>
-                                        <button onClick={() => handleQuantityChange(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>
-                                            -
-                                        </button>
-                                        <input
-                                            type="number"
-                                            value={item.quantity}
-                                            min="1"
-                                            max={item.product.stock}
-                                            onChange={e => {
-                                                let value = parseInt(e.target.value)
-                                                if (isNaN(value) || value < 1) value = 1
-                                                if (value > item.product.stock) value = item.product.stock
-                                                handleQuantityChange(item.id, value)
-                                            }}
-                                        />
-                                        <button onClick={() => handleQuantityChange(item.id, item.quantity + 1)} disabled={item.quantity >= item.product.stock}>
-                                            +
-                                        </button>
-                                    </div>
-                                    <button onClick={() => handleRemoveItem(item.id)}>Remove</button>
+                                    <p>Rp {Number(item.product.price).toLocaleString("id-ID")}</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                        <div>
-                            {(isCalculatingTotal || isDebouncing) ? (
-                                <span>Calculating total...</span>
-                            ) : (
-                                <div>
-                                    Total: Rp {Number(total).toLocaleString("id-ID")}
+                            <div className={styles.cartItemActions}>
+                                <div className={styles.quantityButtons}>
+                                    <button 
+                                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)} 
+                                        disabled={item.quantity <= 1}
+                                    >
+                                        -
+                                    </button>
+                                    <input
+                                        type="number"
+                                        value={item.quantity}
+                                        min="1"
+                                        max={item.product.stock}
+                                        onChange={e => {
+                                            let value = parseInt(e.target.value)
+                                            if (isNaN(value) || value < 1) value = 1
+                                            if (value > item.product.stock) value = item.product.stock
+                                            handleQuantityChange(item.id, value)
+                                        }}
+                                        className={styles.quantityInput}
+                                    />
+                                    <button 
+                                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)} 
+                                        disabled={item.quantity >= item.product.stock}
+                                    >
+                                        +
+                                    </button>
                                 </div>
-                            )}
+                                <button onClick={() => handleRemoveItem(item.id)} className={styles.removeButton}>
+                                    Remove
+                                </button>
+                            </div>
                         </div>
-                        <button onClick={handleCheckout} disabled={isCheckoutDisabled}>
-                            {isCalculatingTotal ? (
-                                <>
-                                    Processing...
-                                </>
-                            ) : (
-                                "Checkout"
-                            )}
-                        </button>
+                    ))}
                 </div>
             )}
+            <div className={styles.cartFooter}>
+                {(isCalculatingTotal || isDebouncing) ? (
+                    <span className={styles.calculatingTotal}>Calculating total...</span>
+                ) : (
+                    <div>
+                        Total: Rp {Number(total).toLocaleString("id-ID")}
+                    </div>
+                )}
+            </div>
+            <button 
+                onClick={handleCheckout} 
+                disabled={isCheckoutDisabled}
+                className={styles.checkoutButton}
+            >
+                {isCalculatingTotal ? "Processing..." : "Checkout"}
+            </button>
         </div>
     )
 }

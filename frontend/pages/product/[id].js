@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import axiosInstance from "../../axiosInstance"
 import { useAuth } from "@/context/AuthContext"
 import Link from "next/link"
+import styles from '../../styles/product.module.css'
 
 export default function ProductDetail() {
     const router = useRouter()
@@ -75,106 +76,163 @@ export default function ProductDetail() {
     }
 
     if (loading || user?.role === "admin") return null
-    if (!product) return <p>Loading...</p>
+    if (!product) return <p className={styles.loading}>Loading...</p>
 
     return (
         <>
-            <main style={{ padding: "2rem", maxWidth: "800px", margin: "auto" }}>
-                <h1>{product.name}</h1>
-                {product.imageUrl && (
-                    <img
-                        src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`}
-                        alt={product.name}
-                        style={{ width: "100%", maxHeight: 400, objectFit: "cover", marginBottom: "1rem" }}
-                    />
-                )}
-                <p><strong>Price:</strong> Rp {Number(product.price).toLocaleString("id-ID")}</p>
-                <p><strong>Stock:</strong> {product.stock}</p>
-                <p><strong>Description:</strong> {product.description}</p>
-                <p><strong>Usage Instructions:</strong> {product.usageInstructions || "-"}</p>
-                <p><strong>Ingredients:</strong> {product.ingredients || "-"}</p>
-                <p>
-                    <strong>Disease Targets:</strong>{" "}
-                    {product.diseaseTargets?.length
-                        ? product.diseaseTargets.join(", ")
-                        : "-"}
-                </p>
-                <p>
-                    <strong>Seller:</strong>{" "}
-                    <Link href={`/seller/${product.sellerId}`}>
-                        <img src={product.seller.imageUrl.startsWith("http") ? product.seller.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${product.seller.imageUrl}`}
-                            alt={product.seller.name}
-                            style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8 }} />
-                        {product.seller.name}
-                    </Link>
-                </p>
+            <main className={styles.productContainer}>
+                <h1 className={styles.productTitle}>{product.name}</h1>
+                
+                <div className={styles.productHeader}>
+                    {product.imageUrl && (
+                        <div className={styles.productImage}>
+                            <img
+                                src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`}
+                                alt={product.name}
+                            />
+                        </div>
+                    )}
 
-                {/* add cart */}
-                <div style={{ margin: "2rem 0" }}>
-                    <label>Quantity: </label>
-                    <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={quantity <= 1}>
-                            –
-                        </button>
+                    <div className={styles.productInfo}>
+                        <p className={styles.productPrice}>{Number(product.price).toLocaleString("id-ID")}</p>
+                        
+                        <div className={styles.productDetails}>
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Stock:</span>
+                                <span className={styles.detailValue}>{product.stock}</span>
+                            </div>
+                            
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Description:</span>
+                                <span className={styles.detailValue}>{product.description}</span>
+                            </div>
+                            
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Usage Instructions:</span>
+                                <span className={styles.detailValue}>{product.usageInstructions || "-"}</span>
+                            </div>
+                            
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Ingredients:</span>
+                                <span className={styles.detailValue}>{product.ingredients || "-"}</span>
+                            </div>
+                            
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Disease Targets:</span>
+                                <span className={styles.detailValue}>
+                                    {product.diseaseTargets?.length
+                                        ? product.diseaseTargets.join(", ")
+                                        : "-"}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className={styles.sellerInfo}>
+                            <Link href={`/seller/${product.sellerId}`} className={styles.sellerLink}>
+                                <img 
+                                    className={styles.sellerImage}
+                                    src={product.seller.imageUrl.startsWith("http") ? product.seller.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${product.seller.imageUrl}`}
+                                    alt={product.seller.name}
+                                />
+                                <span className={styles.sellerName}>{product.seller.name}</span>
+                            </Link>
+                        </div>
 
-                        <input
-                            type="number"
-                            value={quantity}
-                            min="1"
-                            max={product.stock}
-                            onChange={e => {
-                                let value = parseInt(e.target.value)
-                                if (isNaN(value) || value < 1) value = 1
-                                if (value > product.stock) value = product.stock
-                                setQuantity(value)
-                            }}
-                        />
+                        {/* quantity selector */}
+                        <div className={styles.quantitySelector}>
+                            <label className={styles.quantityLabel}>Quantity:</label>
+                            <div className={styles.quantityControls}>
+                                <button 
+                                    className={styles.quantityBtn}
+                                    onClick={() => setQuantity(q => Math.max(1, q - 1))} 
+                                    disabled={quantity <= 1}
+                                >
+                                    –
+                                </button>
 
-                        <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} disabled={quantity >= product.stock}>
-                            +
+                                <input
+                                    className={styles.quantityInput}
+                                    type="number"
+                                    value={quantity}
+                                    min="1"
+                                    max={product.stock}
+                                    onChange={e => {
+                                        let value = parseInt(e.target.value)
+                                        if (isNaN(value) || value < 1) value = 1
+                                        if (value > product.stock) value = product.stock
+                                        setQuantity(value)
+                                    }}
+                                />
+
+                                <button 
+                                    className={styles.quantityBtn}
+                                    onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} 
+                                    disabled={quantity >= product.stock}
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            className={styles.addToCartBtn}
+                            onClick={handleAddToCart} 
+                            disabled={product.stock <= 0}
+                        >
+                            Add to Cart
                         </button>
                     </div>
-                    <button onClick={handleAddToCart} disabled={product.stock <= 0}>Add to Cart</button>
                 </div>
 
-                <hr style={{ margin: "2rem 0" }} />
+                <hr className={styles.divider} />
 
-                <section style={{ marginTop: "2rem" }}>
-                    <h2>Your Review</h2>
+                {/* User's review section */}
+                <section className={styles.reviewsSection}>
+                    <h2 className={styles.reviewsHeading}>Your Review</h2>
                     {myReview ? (
-                        <div>
-                            <p><strong>Your Rating:</strong> {myReview.rating} / 5</p>
-                            <p><strong>Your Comment:</strong> {myReview.comment}</p>
-                            <button onClick={() => {
-                                setReviewForm({ rating: myReview.rating, comment: myReview.comment })
-                                setShowReviewModal(true)
-                            }}>Edit</button>
-                            <button
-                                onClick={async () => {
-                                    if (confirm("Are you sure you want to delete this review?")) {
-                                        try {
-                                            await axiosInstance.delete(`/reviews/${id}`)
-                                            const res = await axiosInstance.get(`/reviews/${id}`, { params: { page: 1 } })
-                                            setReviews(res.data.data)
-                                            setReviewLastPage(res.data.meta.lastPage)
-                                            if (user) {
-                                                const mine = res.data.data.find(r => r.user?.id === user.id)
-                                                setMyReview(mine)
-                                            }
+                        <div className={styles.reviewCard}>
+                            <p><span className={styles.detailLabel}>Your Rating:</span> {myReview.rating} / 5</p>
+                            <p><span className={styles.detailLabel}>Your Comment:</span> {myReview.comment}</p>
+                            <div className={styles.buttonGroup}>
+                                <button 
+                                    className={styles.submitButton}
+                                    onClick={() => {
+                                        setReviewForm({ rating: myReview.rating, comment: myReview.comment })
+                                        setShowReviewModal(true)
+                                    }}
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    className={styles.cancelButton}
+                                    onClick={async () => {
+                                        if (confirm("Are you sure you want to delete this review?")) {
+                                            try {
+                                                await axiosInstance.delete(`/reviews/${id}`)
+                                                const res = await axiosInstance.get(`/reviews/${id}`, { params: { page: 1 } })
+                                                setReviews(res.data.data)
+                                                setReviewLastPage(res.data.meta.lastPage)
+                                                if (user) {
+                                                    const mine = res.data.data.find(r => r.user?.id === user.id)
+                                                    setMyReview(mine)
+                                                }
 
-                                            setShowReviewModal(false)
-                                            setReviewPage(1)
-                                        } catch (err) {
-                                            alert(err.response?.data?.message || "Delete failed")
+                                                setShowReviewModal(false)
+                                                setReviewPage(1)
+                                            } catch (err) {
+                                                alert(err.response?.data?.message || "Delete failed")
+                                            }
                                         }
-                                    }
-                                }}
-                            >
-                                Delete
-                            </button>
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     ) : (
-                            <button onClick={async () => {
+                        <button 
+                            className={styles.submitButton}
+                            onClick={async () => {
                                 try {
                                     const res = await axiosInstance.get(`/reviews/eligible/${id}`)
                                     if (!res.data.eligible) {
@@ -186,87 +244,117 @@ export default function ProductDetail() {
                                 } catch (err) {
                                     alert("Failed to check review eligibility", err)
                                 }
-                            }}>Leave a Review</button>
+                            }}
+                        >
+                            Leave a Review
+                        </button>
                     )}
                 </section>
 
                 {showReviewModal && (
-                    <div style={{ background: "#eee", padding: 20, marginTop: 20 }}>
-                        <h3>{myReview ? "Edit Review" : "Add Review"}</h3>
-                        <label>Rating (1-5): </label>
-                        <input
-                            type="number"
-                            value={reviewForm.rating}
-                            min={1}
-                            max={5}
-                            onChange={e => setReviewForm(f => ({ ...f, rating: +e.target.value }))}
-                        /><br />
-                        <label>Comment: </label><br />
-                        <textarea
-                            value={reviewForm.comment}
-                            onChange={e => setReviewForm(f => ({ ...f, comment: e.target.value }))}
-                        /><br />
+                    <div className={styles.reviewModal}>
+                        <h3 className={styles.modalTitle}>{myReview ? "Edit Review" : "Add Review"}</h3>
+                        <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Rating (1-5):</label>
+                            <input
+                                className={styles.ratingInput}
+                                type="number"
+                                value={reviewForm.rating}
+                                min={1}
+                                max={5}
+                                onChange={e => setReviewForm(f => ({ ...f, rating: +e.target.value }))}
+                            />
+                        </div>
+                        <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Comment:</label>
+                            <textarea
+                                className={styles.commentTextarea}
+                                value={reviewForm.comment}
+                                onChange={e => setReviewForm(f => ({ ...f, comment: e.target.value }))}
+                            />
+                        </div>
 
-                        <button
-                            onClick={async () => {
-                                try {
-                                    if (myReview) {
-                                        await axiosInstance.put(`/reviews/${id}`, reviewForm)
-                                    } else {
-                                        await axiosInstance.post(`/reviews/${id}`, reviewForm)
-                                    }
-                                    const res = await axiosInstance.get(`/reviews/${id}`, { params: { page: 1 } })
-                                    setReviews(res.data.data)
-                                    setReviewLastPage(res.data.meta.lastPage)
-                                    if (user) {
-                                        const mine = res.data.data.find(r => r.user?.id === user.id)
-                                        setMyReview(mine)
-                                    }
+                        <div className={styles.buttonGroup}>
+                            <button
+                                className={styles.submitButton}
+                                onClick={async () => {
+                                    try {
+                                        if (myReview) {
+                                            await axiosInstance.put(`/reviews/${id}`, reviewForm)
+                                        } else {
+                                            await axiosInstance.post(`/reviews/${id}`, reviewForm)
+                                        }
+                                        const res = await axiosInstance.get(`/reviews/${id}`, { params: { page: 1 } })
+                                        setReviews(res.data.data)
+                                        setReviewLastPage(res.data.meta.lastPage)
+                                        if (user) {
+                                            const mine = res.data.data.find(r => r.user?.id === user.id)
+                                            setMyReview(mine)
+                                        }
 
-                                    setShowReviewModal(false)
-                                    setReviewPage(1)
-                                } catch (err) {
-                                    alert(err.response?.data?.message || "Failed to submit review")
-                                }
-                            }}
-                        >
-                            Submit
-                        </button>
-                        <button onClick={() => setShowReviewModal(false)}>Cancel</button>
+                                        setShowReviewModal(false)
+                                        setReviewPage(1)
+                                    } catch (err) {
+                                        alert(err.response?.data?.message || "Failed to submit review")
+                                    }
+                                }}
+                            >
+                                Submit
+                            </button>
+                            <button 
+                                className={styles.cancelButton}
+                                onClick={() => setShowReviewModal(false)}
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 )}
 
-                <hr style={{ margin: "2rem 0" }} />
+                <hr className={styles.divider} />
 
-                {/* comment */}
-                <section>
-                    <h2>Reviews</h2>
+                {/* All reviews section */}
+                <section className={styles.reviewsSection}>
+                    <h2 className={styles.reviewsHeading}>Reviews</h2>
                     {reviews.length === 0 ? (
-                        <p>No reviews yet.</p>
+                        <p className={styles.emptyMessage}>No reviews yet.</p>
                     ) : (
                         reviews.map(r => (
-                            <div key={r.id} style={{ marginBottom: "1.5rem" }}>
-                                <img
-                                    src={r.user.imageUrl.startsWith("http") ? r.user.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${r.user.imageUrl}`}
-                                    alt={r.user.name}
-                                    style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8 }}/>
-                                <p><strong>{r.user?.name}</strong> &ndash; {new Date(r.createdAt).toLocaleDateString()}</p>
-                                <p>Rating: {r.rating} / 5</p>
-                                <p>{r.comment}</p>
-                                <hr />
+                            <div key={r.id} className={styles.reviewCard}>
+                                <div className={styles.reviewHeader}>
+                                    <img
+                                        className={styles.reviewerImage}
+                                        src={r.user.imageUrl.startsWith("http") ? r.user.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${r.user.imageUrl}`}
+                                        alt={r.user.name}
+                                    />
+                                    <div className={styles.reviewerInfo}>
+                                        <p className={styles.reviewerName}>{r.user?.name}</p>
+                                        <p className={styles.reviewDate}>{new Date(r.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                                <p className={styles.rating}>Rating: {r.rating} / 5</p>
+                                <p className={styles.reviewText}>{r.comment}</p>
                             </div>
                         ))
                     )}
 
                     {/* pagination */}
-                    <div style={{ textAlign: "center", marginTop: "1rem" }}>
-                        <button onClick={() => setReviewPage(p => Math.max(p - 1, 1))} disabled={reviewPage === 1}>
+                    <div className={styles.pagination}>
+                        <button 
+                            className={styles.paginationButton}
+                            onClick={() => setReviewPage(p => Math.max(p - 1, 1))} 
+                            disabled={reviewPage === 1}
+                        >
                             Prev
                         </button>
-                        <span style={{ margin: "0 1rem" }}>
+                        <span className={styles.paginationText}>
                             Page {reviewPage} of {reviewLastPage}
                         </span>
-                        <button onClick={() => setReviewPage(p => Math.min(p + 1, reviewLastPage))} disabled={reviewPage === reviewLastPage}>
+                        <button 
+                            className={styles.paginationButton}
+                            onClick={() => setReviewPage(p => Math.min(p + 1, reviewLastPage))} 
+                            disabled={reviewPage === reviewLastPage}
+                        >
                             Next
                         </button>
                     </div>
