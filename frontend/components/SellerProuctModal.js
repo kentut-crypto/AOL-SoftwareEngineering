@@ -20,7 +20,7 @@ export default function SellerProductModal ({ isOpen, onClose, onSubmit, initial
         setDescription(initial.description || "")
         setUsageInstructions(initial.usageInstructions || "")
         setIngredients(initial.ingredients || "")
-        setDiseaseTargets(initial.diseaseTargets?.join(", ") || "")
+        setDiseaseTargets(initial.diseaseTargets?.join(",") || "")
         setPreview(initial.imageUrl)
         setFile(null)
     }, [initial])

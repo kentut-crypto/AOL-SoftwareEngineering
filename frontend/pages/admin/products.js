@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react"
 import axiosInstance from "@/axiosInstance"
+import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/router"
 
 export default function AdminProductsPage() {
+    const { user, loading } = useAuth()
+    const router = useRouter()
     const [products, setProducts] = useState([])
     const [minPrice, setMinPrice] = useState("")
     const [maxPrice, setMaxPrice] = useState("")
@@ -41,8 +45,15 @@ export default function AdminProductsPage() {
     }
 
     useEffect(() => {
-        fetchProducts()
-    }, [page, sort])
+        if (!loading) {
+            if (user?.role === "admin") {
+                fetchProducts()
+            } else {
+                router.replace("/")
+                return
+            }
+        }
+    }, [loading, user, page, sort])
 
     const openEditModal = (product) => {
         setEditingProduct(product)
@@ -110,6 +121,8 @@ export default function AdminProductsPage() {
             console.error("Failed to delete product", err)
         }
     }
+
+    if (loading || user?.role !== "admin") return <p>Loading or Unauthorized</p>
 
     return (
         <>

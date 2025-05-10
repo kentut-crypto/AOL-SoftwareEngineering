@@ -5,7 +5,8 @@ const { getAllProducts,
     getProductsBySeller,
     createProduct,
     updateProduct,
-    deleteProduct } = require("../controllers/productController")
+    deleteProduct,
+    getAllProductAdmin } = require("../controllers/productController")
 const { verifyTokenFromCookie } = require("../middleware/authMiddleware")
 const multer = require("multer")
 const path = require("path")
@@ -30,6 +31,7 @@ const upload = multer({ storage })
 
 // public routes
 router.get("/", getAllProducts)
+router.get("/allproducts", verifyTokenFromCookie, getAllProductAdmin)
 router.get("/:id", getProductById)
 router.get("/seller/:sellerId", getProductsBySeller)
 

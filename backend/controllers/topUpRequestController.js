@@ -11,7 +11,7 @@ const createTopUp = async (req, res) => {
             amount
         })
 
-        res.status(201).json(review)
+        res.status(201).json(topup)
     } catch (err) {
         console.error(err)
         res.status(500).json({ message: "Failed to request top-up", error: err.message })
@@ -19,6 +19,7 @@ const createTopUp = async (req, res) => {
 }
 
 const getIncomingTopUps = async (req, res) => {
+    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied: Admins only" })
     try {
         const topups = await TopUpRequest.findAll({
             where: { status: "pending" },
@@ -29,7 +30,7 @@ const getIncomingTopUps = async (req, res) => {
             },
             order: [["createdAt", "DESC"]]
         })
-        res.json({ topups })
+        res.json({ data: topups })
     } catch (err) {
         console.error(err)
         res.status(500).json({ message: "Failed to get incoming top-ups", error: err.message })
@@ -39,6 +40,7 @@ const getIncomingTopUps = async (req, res) => {
 const handleTopUp = async (req, res) => {
     const { id } = req.params
     const { action } = req.body
+    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied: Admins only" })
     try {
         const topup = await TopUpRequest.findByPk(id)
         if (!topup) return res.status(404).json({ message: "Top-up not found" })
@@ -66,11 +68,11 @@ const handleTopUp = async (req, res) => {
 const getTopUpHistory = async (req, res) => {
     const userId = req.user.id
     try {
-        const history = TopUpRequest.findAll({
+        const history = await TopUpRequest.findAll({
             where: { userId },
             order: [["createdAt", "DESC"]]
         })
-        res.json({ history })
+        res.json({ data: history })
     } catch (err) {
         console.error(err)
         res.status(500).json({ message: "Failed to get top-up history", error: err.message })

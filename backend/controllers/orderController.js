@@ -117,11 +117,17 @@ const acceptOrderItem = async (req, res) => {
         const buyer = await User.findByPk(order.userId)
         if (!buyer) return res.status(404).json({ message: "Buyer not found" })
 
+        const seller = await User.findByPk(product.sellerId)
+        if (!seller) return res.status(404).json({ message: "Seller not found" })
+
         const totalCost = orderItem.quantity * orderItem.priceAtPurchase
         if (buyer.money < totalCost) return res.status(400).json({ message: "Buyer has insufficient balance" })
         
         buyer.money -= totalCost
         await buyer.save()
+
+        seller.money += totalCost
+        await seller.save()
 
         product.stock -= orderItem.quantity
         await product.save()

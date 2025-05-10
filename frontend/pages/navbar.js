@@ -57,6 +57,7 @@ export default function Navbar() {
                             </li>
                         )}
                         <li>
+                            <Link href="/topup">Top Up History</Link>
                             <Link href="/cart">Cart</Link>
                             <Link href="/history">Purchase History</Link>
                             <h1>Money : {user.money}</h1>

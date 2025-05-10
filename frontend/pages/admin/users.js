@@ -1,16 +1,25 @@
 import { useEffect, useState } from "react"
 import axiosInstance from "@/axiosInstance"
 import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/router"
 
 export default function AdminUserPage() {
     const { user, loading } = useAuth()
+    const router = useRouter()
     const [users, setUsers] = useState([])
     const [selectedUser, setSelectedUser] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [formData, setFormData] = useState({ name: "", role: "", image: null })
 
     useEffect(() => {
-        if (!loading && user?.role === "admin") fetchUsers()
+        if (!loading) {
+            if (user?.role === "admin") {
+                fetchUsers()
+            } else {
+                router.replace("/")
+                return
+            }
+        }
     }, [loading, user])
 
     const fetchUsers = async () => {
@@ -70,25 +79,30 @@ export default function AdminUserPage() {
     return (
         <div style={{ padding: "2rem" }}>
             <h1>Admin - Manage Users</h1>
-            {users.map((u) => (
-                <div key={u.id} style={{ border: "1px solid #ccc", padding: "1rem", margin: "1rem 0", borderRadius: "8px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                        {u.imageUrl && (
-                            <img
-                                src={u.imageUrl.startsWith("http") ? u.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${u.imageUrl}`}
-                                alt="avatar"
-                                style={{ width: 50, height: 50, borderRadius: "50%" }}
-                            />
-                        )}
-                        <div style={{ flexGrow: 1 }}>
-                            <p><strong>{u.name}</strong> ({u.email})</p>
-                            <p>Role: {u.role}</p>
+
+            {users.length === 0 ? (
+                <p>No users found.</p>
+            ) : (
+                users.map((u) => (
+                    <div key={u.id} style={{ border: "1px solid #ccc", padding: "1rem", margin: "1rem 0", borderRadius: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                            {u.imageUrl && (
+                                <img
+                                    src={u.imageUrl.startsWith("http") ? u.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${u.imageUrl}`}
+                                    alt="avatar"
+                                    style={{ width: 50, height: 50, borderRadius: "50%" }}
+                                />
+                            )}
+                            <div style={{ flexGrow: 1 }}>
+                                <p><strong>{u.name}</strong> ({u.email})</p>
+                                <p>Role: {u.role}</p>
+                            </div>
+                            <button onClick={() => openModal(u)}>Edit</button>
+                            <button onClick={() => handleDelete(u.id)} style={{ backgroundColor: "red", color: "white" }}>Delete</button>
                         </div>
-                        <button onClick={() => openModal(u)}>Edit</button>
-                        <button onClick={() => handleDelete(u.id)} style={{ backgroundColor: "red", color: "white" }}>Delete</button>
                     </div>
-                </div>
-            ))}
+                ))
+            )}
 
             {isModalOpen && (
                 <div style={{
