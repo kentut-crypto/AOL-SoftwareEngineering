@@ -4,8 +4,10 @@ import axiosInstance from "../../axiosInstance"
 import { useAuth } from "@/context/AuthContext"
 import Link from "next/link"
 import styles from '../../styles/product.module.css'
+import { useSocket } from "@/context/SocketContext"
 
 export default function ProductDetail() {
+    const socket = useSocket()
     const router = useRouter()
     const { id } = router.query
     const { user, loading } = useAuth()
@@ -21,6 +23,14 @@ export default function ProductDetail() {
     const [myReview, setMyReview] = useState(null)
     const [showReviewModal, setShowReviewModal] = useState(false)
     const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" })
+
+    useEffect(() => {
+        if (!socket) return
+        return () => {
+            socket.off("roomJoined")
+            socket.off("error")
+        }
+    }, [socket])
 
     useEffect(() => {
         if (!loading && user?.role === "admin") {
@@ -73,6 +83,38 @@ export default function ProductDetail() {
             console.error("Add to cart failed", err)
             alert("Failed to add to cart")
         }
+    }
+
+    const handleContact = (sellerId) => {
+        if(!user) {
+            alert("Please login first")
+            router.push("/login")
+            return
+        }
+
+        if (user.role !== "user") {
+            alert("Only buyers can initiate chat")
+            return
+        }
+
+        if (user.id === sellerId) {
+            alert("Cannot contact yourself")
+            return
+        }
+
+        socket.emit("joinRoom", {
+            userId: user.id,
+            sellerId,
+            role: "user",
+        })
+
+        socket.once("roomJoined", (roomId) => {
+            router.push(`/chat/${roomId}`)
+        })
+
+        socket.once("error", (err) => {
+            alert(err)
+        })
     }
 
     if (loading || user?.role === "admin") return null
@@ -137,6 +179,14 @@ export default function ProductDetail() {
                                 <span className={styles.sellerName}>{product.seller.name}</span>
                             </Link>
                         </div>
+
+                        {user && user.id !== product.sellerId && user.role !== "seller" && (
+                            <button
+                                onClick={() => handleContact(product.sellerId)}
+                            >
+                                Contact Seller
+                            </button>
+                        )}
 
                         {/* quantity selector */}
                         <div className={styles.quantitySelector}>

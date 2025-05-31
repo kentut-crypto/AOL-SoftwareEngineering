@@ -53,6 +53,7 @@ export default function Navbar() {
                         <Link href="/topup" className={styles.link}>Top-Up History</Link>
                         <Link href="/cart" className={styles.link}>Cart</Link>
                         <Link href="/history" className={styles.link}>Purchase History</Link>
+                        <Link href="/chat/chatlist" className={styles.link}>Chats</Link>
                         <span className={styles.money}>Money: {user.money}</span>
                         <button onClick={handleLogout} className={styles.button}>Logout</button>
                     </div>
