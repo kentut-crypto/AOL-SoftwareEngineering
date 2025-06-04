@@ -14,9 +14,10 @@ export default function SellerProductModal({
     const [description, setDescription] = useState(initial.description)
     const [usageInstructions, setUsageInstructions] = useState(initial.usageInstructions)
     const [ingredients, setIngredients] = useState(initial.ingredients)
-    const [diseaseTargets, setDiseaseTargets] = useState(initial.diseaseTargets.join(", "))
+    const [diseaseTargets, setDiseaseTargets] = useState(initial.diseaseTargets || [])
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState(initial.imageUrl)
+    const diseaseOptions = ["Blight", "Common Rust", "Gray Leaf Spot"]
 
     useEffect(() => {
         setName(initial.name)
@@ -25,12 +26,23 @@ export default function SellerProductModal({
         setDescription(initial.description || "")
         setUsageInstructions(initial.usageInstructions || "")
         setIngredients(initial.ingredients || "")
-        setDiseaseTargets(initial.diseaseTargets?.join(", ") || "")
+        setDiseaseTargets(initial.diseaseTargets || [])
         setPreview(initial.imageUrl)
         setFile(null)
     }, [initial])
 
     if (!isOpen) return null
+
+    const handleDiseaseCheckboxChange = (e) => {
+        const { value, checked } = e.target
+        setDiseaseTargets(prevDiseaseTargets => {
+            if (checked) {
+                return [...new Set([...prevDiseaseTargets, value])]
+            } else {
+                return prevDiseaseTargets.filter(d => d !== value)
+            }
+        })
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -44,7 +56,7 @@ export default function SellerProductModal({
             description,
             usageInstructions,
             ingredients,
-            diseaseTargets: diseaseTargets.split(",").map(d => d.trim()).filter(Boolean),
+            diseaseTargets,
             file,
             currentImage: preview
         })
@@ -101,11 +113,22 @@ export default function SellerProductModal({
                         placeholder="Ingredients (optional)"
                     />
 
-                    <input
-                        value={diseaseTargets}
-                        onChange={e => setDiseaseTargets(e.target.value)}
-                        placeholder="Disease Targets (comma separated)"
-                    />
+                    <div>
+                        <label>Disease Targets</label>
+                        {diseaseOptions.map(option => (
+                            <div key={option}>
+                                <input
+                                    type="checkbox"
+                                    id={`disease-${option}`}
+                                    name="diseaseTargets"
+                                    value={option}
+                                    checked={diseaseTargets.includes(option)}
+                                    onChange={handleDiseaseCheckboxChange}
+                                />
+                                <label htmlFor={`disease-${option}`}>{option}</label>
+                            </div>
+                        ))}
+                    </div>
 
                     <input
                         type="file"
