@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext"
 import axiosInstance from "@/axiosInstance"
 import SellerProductModal from "@/components/SellerProuctModal"
 import { useRouter } from "next/router"
+import styles from  "../../styles/seller/productSell.module.css"
 
 export default function SellerProducts() {
     const { user, loading } = useAuth()
@@ -24,12 +25,17 @@ export default function SellerProducts() {
     }, [user, loading, page])
 
     async function fetchProducts() {
-        const res = await axiosInstance.get(`/products/seller/${user.id}`, { params: { page } })
+        const res = await axiosInstance.get(`/products/seller/${user.id}`, {
+            params: { page }
+        })
         setProducts(res.data.data)
         setTotalPages(res.data.meta.lastPage)
     }
 
-    const handleCreateOrUpdate = async ({ name, price, file, currentImage, stock, description, diseaseTargets, usageInstructions, ingredients }) => {
+    const handleCreateOrUpdate = async ({
+        name, price, file, currentImage, stock, description,
+        diseaseTargets, usageInstructions, ingredients
+    }) => {
         const formData = new FormData()
         formData.append("name", name)
         formData.append("price", price)
@@ -52,14 +58,12 @@ export default function SellerProducts() {
 
         try {
             if (editProduct) {
-                // edit
                 await axiosInstance.put(
                     `/products/${editProduct.id}`,
                     formData,
                     { headers: { "Content-Type": "multipart/form-data" } }
                 )
             } else {
-                // add
                 await axiosInstance.post(
                     "/products",
                     formData,
@@ -80,6 +84,7 @@ export default function SellerProducts() {
         setEditProduct(null)
         setModalOpen(true)
     }
+
     const openEditModal = (product) => {
         setEditProduct(product)
         setModalOpen(true)
@@ -88,34 +93,52 @@ export default function SellerProducts() {
     if (loading) return <p>Loading…</p>
 
     return (
-        <main>
+        <main className={styles.page}>
             <h1>Your Products</h1>
-            <button onClick={openCreateModal}>+ Add Product</button>
-            <ul>
+            <button className={styles.addButton} onClick={openCreateModal}>
+                + Add Product
+            </button>
+
+            <ul className={styles.productList}>
                 {products.map(p => (
-                    <li key={p.id}>
-                        {p.imageUrl && <img src={`${process.env.NEXT_PUBLIC_API_URL}${p.imageUrl}`} alt={p.name} style={{ maxWidth: 300 }} />}
+                    <li className={styles.productCard} key={p.id}>
+                        {p.imageUrl && (
+                            <img
+                                src={`${process.env.NEXT_PUBLIC_API_URL}${p.imageUrl}`}
+                                alt={p.name}
+                            />
+                        )}
                         <h3>{p.name}</h3>
                         <p>Rating: {p.rating ?? "N/A"}</p>
                         <p>Price: Rp {Number(p.price).toLocaleString("id-ID")}</p>
                         <p>Stock: {p.stock}</p>
                         <button onClick={() => openEditModal(p)}>Edit</button>
-                        <button onClick={async () => {
-                            await axiosInstance.delete(`/products/${p.id}`)
-                            fetchProducts()
-                        }}>Delete</button>
+                        <button
+                            onClick={async () => {
+                                await axiosInstance.delete(`/products/${p.id}`)
+                                fetchProducts()
+                            }}
+                        >
+                            Delete
+                        </button>
                     </li>
                 ))}
             </ul>
 
-            <div>
-                <button onClick={() => setPage(prev => Math.max(1, prev - 1))} disabled={page === 1}>
+            <div className={styles.pagination}>
+                <button
+                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                    disabled={page === 1}
+                >
                     Previous
                 </button>
 
                 <span> Page {page} of {totalPages} </span>
-                
-                <button onClick={() => setPage(prev => Math.min(totalPages, prev + 1))} disabled={page === totalPages}>
+
+                <button
+                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={page === totalPages}
+                >
                     Next
                 </button>
             </div>

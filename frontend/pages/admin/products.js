@@ -11,7 +11,7 @@ export default function AdminProductsPage() {
     const [maxPrice, setMaxPrice] = useState("")
     const [search, setSearch] = useState("")
     const [sort, setSort] = useState("")
-    const [disease, setDisease] = useState("")
+    const [filterDiseases, setFilterDiseases] = useState([])
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
 
@@ -27,6 +27,8 @@ export default function AdminProductsPage() {
         image: null
     })
 
+    const diseaseOptions = ["Blight", "Common Rust", "Gray Leaf Spot"]
+
     const fetchProducts = async () => {
         try {
             const params = { page }
@@ -34,7 +36,9 @@ export default function AdminProductsPage() {
             if (maxPrice) params.maxPrice = maxPrice
             if (search) params.search = search
             if (sort) params.sort = sort
-            if (disease) params.disease = disease
+            if (filterDiseases.length > 0) {
+                params.disease = filterDiseases.join(',')
+            }
 
             const res = await axiosInstance.get("/products/allproducts", { params })
             setProducts(res.data.data)
@@ -80,6 +84,35 @@ export default function AdminProductsPage() {
             ingredients: "",
             diseaseTargets: [],
             image: null
+        })
+    }
+
+    const handleDiseaseCheckboxChange = (e) => {
+        const { value, checked } = e.target
+        setFormData(prevFormData => {
+            const currentDiseaseTargets = prevFormData.diseaseTargets || []
+            if (checked) {
+                return {
+                    ...prevFormData,
+                    diseaseTargets: [...new Set([...currentDiseaseTargets, value])]
+                }
+            } else {
+                return {
+                    ...prevFormData,
+                    diseaseTargets: currentDiseaseTargets.filter(d => d !== value)
+                }
+            }
+        })
+    }
+
+    const handleFilterDiseaseCheckboxChange = (e) => {
+        const { value, checked } = e.target
+        setFilterDiseases(prevFilterDiseases => {
+            if (checked) {
+                return [...new Set([...prevFilterDiseases, value])]
+            } else {
+                return prevFilterDiseases.filter(d => d !== value)
+            }
         })
     }
 
@@ -149,12 +182,21 @@ export default function AdminProductsPage() {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                     />
-                    <input
-                        type="text"
-                        placeholder="Disease target"
-                        value={disease}
-                        onChange={e => setDisease(e.target.value)}
-                    />
+                    <div style={{ }}>
+                        <label>Filter by Disease</label>
+                        {diseaseOptions.map(option => (
+                            <div key={`filter-${option}`}>
+                                <input
+                                    type="checkbox"
+                                    id={`filter-${option}`}
+                                    value={option}
+                                    checked={filterDiseases.includes(option)}
+                                    onChange={handleFilterDiseaseCheckboxChange}
+                                />
+                                <label htmlFor={`filter-${option}`}>{option}</label>
+                            </div>
+                        ))}
+                    </div>
                     <select value={sort} onChange={e => setSort(e.target.value)}>
                         <option value="">Sort</option>
                         <option value="price_asc">Price Low → High</option>
@@ -242,12 +284,22 @@ export default function AdminProductsPage() {
                             <textarea placeholder="Description" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                             <textarea placeholder="Usage Instructions" value={formData.usageInstructions} onChange={e => setFormData({ ...formData, usageInstructions: e.target.value })} />
                             <textarea placeholder="Ingredients" value={formData.ingredients} onChange={e => setFormData({ ...formData, ingredients: e.target.value })} />
-                            <input
-                                type="text"
-                                placeholder="Disease Target"
-                                value={formData.diseaseTargets}
-                                onChange={e => setFormData({ ...formData, diseaseTargets: e.target.value.split(',') })}
-                            />
+                            <div style={{ }}>
+                                <label>Disease Targets</label>
+                                {diseaseOptions.map(option => (
+                                    <div key={option}>
+                                        <input
+                                            type="checkbox"
+                                            id={option}
+                                            name="diseaseTargets"
+                                            value={option}
+                                            checked={formData.diseaseTargets.includes(option)}
+                                            onChange={handleDiseaseCheckboxChange}
+                                        />
+                                        <label htmlFor={option}>{option}</label>
+                                    </div>
+                                ))}
+                            </div>
                             <input type="file" onChange={e => setFormData({ ...formData, image: e.target.files[0] })} />
                             <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
                                 <button type="submit">Save</button>

@@ -22,7 +22,12 @@ const getAllProducts = async (req, res) => {
         if (minPrice) where.price = { ...(where.price || {}), [Op.gte]: parseFloat(minPrice) }
         if (maxPrice) where.price = { ...(where.price || {}), [Op.lte]: parseFloat(maxPrice) }
         if (search) where.name = { [Op.iLike]: `%${search}%` }
-        if (disease) where.diseaseTargets = { [Op.contains]: [disease] }
+        if (disease) {
+            const diseaseArray = disease.split(',').map(d => d.trim()).filter(Boolean)
+            if (diseaseArray.length > 0) {
+                where.diseaseTargets = { [Op.contains]: diseaseArray }
+            }
+        }
 
         let order = [["createdAt", "DESC"]] // default newest first
         if (sort === "price_asc")  order = [["price",  "ASC"]]
@@ -70,7 +75,12 @@ const getAllProductAdmin = async (req, res) => {
         if (minPrice) where.price = { ...(where.price || {}), [Op.gte]: parseFloat(minPrice) }
         if (maxPrice) where.price = { ...(where.price || {}), [Op.lte]: parseFloat(maxPrice) }
         if (search) where.name = { [Op.iLike]: `%${search}%` }
-        if (disease) where.diseaseTargets = { [Op.contains]: [disease] }
+        if (disease) {
+            const diseaseArray = disease.split(',').map(d => d.trim()).filter(Boolean)
+            if (diseaseArray.length > 0) {
+                where.diseaseTargets = { [Op.contains]: diseaseArray }
+            }
+        }
 
         let order = [["createdAt", "DESC"]] // default newest first
         if (sort === "price_asc")  order = [["price",  "ASC"]]
@@ -147,7 +157,12 @@ const getProductsBySeller = async (req, res) => {
         if (minPrice) where.price = { ...(where.price || {}), [Op.gte]: parseFloat(minPrice) }
         if (maxPrice) where.price = { ...(where.price || {}), [Op.lte]: parseFloat(maxPrice) }
         if (search) where.name = { [Op.iLike]: `%${search}%` }
-        if (disease) where.diseaseTargets = { [Op.contains]: [disease] }
+        if (disease) {
+            const diseaseArray = disease.split(',').map(d => d.trim()).filter(Boolean)
+            if (diseaseArray.length > 0) {
+                where.diseaseTargets = { [Op.contains]: diseaseArray }
+            }
+        }
 
         let order = [["createdAt", "DESC"]]
         if (sort === "price_asc") order = [["price", "ASC"]]
@@ -218,6 +233,11 @@ const updateProduct = async (req, res) => {
         if (product.sellerId !== req.user.id && req.user.role !== "admin") return res.status(403).json({ message: "Not authorized to update this product" })
 
         const updates = { ...req.body }
+        if (req.body.diseaseTargets && !Array.isArray(req.body.diseaseTargets)) {
+            updates.diseaseTargets = req.body.diseaseTargets.split(',').map(d => d.trim()).filter(Boolean)
+        } else if (req.body.diseaseTargets === undefined) {
+             delete updates.diseaseTargets
+        }
         if (req.file) {
             if (product.imageUrl) {
                 const oldImagePath = path.join(__dirname, "../uploads/products", path.basename(product.imageUrl))
