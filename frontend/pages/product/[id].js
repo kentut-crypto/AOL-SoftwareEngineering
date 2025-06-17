@@ -182,11 +182,13 @@ export default function ProductDetail() {
 
                         {user && user.id !== product.sellerId && user.role !== "seller" && (
                             <button
+                                className={styles.contactSellerBtn}
                                 onClick={() => handleContact(product.sellerId)}
                             >
                                 Contact Seller
                             </button>
                         )}
+                        <br></br>
 
                         {/* quantity selector */}
                         <div className={styles.quantitySelector}>

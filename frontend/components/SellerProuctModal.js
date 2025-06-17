@@ -113,10 +113,10 @@ export default function SellerProductModal({
                         placeholder="Ingredients (optional)"
                     />
 
-                    <div>
+                    <div className={styles.diseaseTargetsGroup}>
                         <label>Disease Targets</label>
                         {diseaseOptions.map(option => (
-                            <div key={option}>
+                            <div key={option} className={styles.checkboxItem}>
                                 <input
                                     type="checkbox"
                                     id={`disease-${option}`}
@@ -124,6 +124,7 @@ export default function SellerProductModal({
                                     value={option}
                                     checked={diseaseTargets.includes(option)}
                                     onChange={handleDiseaseCheckboxChange}
+                                    className={styles.checkboxInput}
                                 />
                                 <label htmlFor={`disease-${option}`}>{option}</label>
                             </div>
@@ -138,10 +139,10 @@ export default function SellerProductModal({
                             setPreview(URL.createObjectURL(e.target.files[0]))
                         }}
                     />
-                    {preview && <img src={preview} alt="" style={{ maxWidth: 200 }} />}
+                    {preview && <img src={preview} alt="Product Preview" className={styles.modalImagePreview} />}
 
                     <button type="submit">{submitLabel}</button>
-                    <button type="button" onClick={handleClose}>Cancel</button>
+                    <button type="button" onClick={handleClose} className={styles.cancelButton}>Cancel</button>
                 </form>
             </div>
         </div>

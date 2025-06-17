@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import axiosInstance from "../axiosInstance"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/router"
+import styles from "../styles/history.module.css"
 
 export default function OrderHistory() {
     const [orders, setOrders] = useState([])
@@ -29,24 +30,39 @@ export default function OrderHistory() {
     if (loading || user?.role === "admin") return null
 
     return (
-        <div>
-            <h1>Order History</h1>
+        <div className={styles.container}>
+            <h1 className={styles.heading}>Order History</h1>
             {orders.length === 0 ? (
-                <p>No orders found</p>
+                <p className={styles.noOrders}>No orders found</p>
             ) : (
-                orders.map(order => (
-                    <div key={order.id}>
-                        <h3>Order ID: {order.id}</h3>
-                        <p>Total Price: Rp {Number(order.totalPrice).toLocaleString("id-ID")}</p>
-                        <ul>
-                            {order.products.map(product => (
-                                <li key={product.id}>
-                                    {product.name} : {product.OrderItem.quantity} x Rp{Number(product.OrderItem.priceAtPurchase).toLocaleString("id-ID")} - Status: {product.OrderItem.status}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ))
+                <ul className={styles.orderList}>
+                    {orders.map(order => (
+                        <li key={order.id} className={styles.orderCard}>
+                            <div className={styles.orderHeader}>
+                                <h3 className={styles.orderId}>Order ID: {order.id}</h3>
+                                <p className={styles.totalPrice}>Total Price: Rp {Number(order.totalPrice).toLocaleString("id-ID")}</p>
+                            </div>
+                            <ul className={styles.productList}>
+                                {order.products.map(product => (
+                                    <li key={product.id} className={styles.productItem}>
+                                        <span className={styles.productName}>{product.name}</span>
+                                        <span className={styles.productQuantityPrice}>
+                                            {product.OrderItem.quantity} x Rp{Number(product.OrderItem.priceAtPurchase).toLocaleString("id-ID")}
+                                        </span>
+                                        <span className={`${styles.itemStatus} ${
+                                            product.OrderItem.status === 'pending' ? styles.statusPending :
+                                            product.OrderItem.status === 'shipped' ? styles.statusShipped :
+                                            product.OrderItem.status === 'delivered' ? styles.statusDelivered :
+                                            styles.statusCanceled
+                                        }`}>
+                                            {product.OrderItem.status}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </li>
+                    ))}
+                </ul>
             )}
         </div>
     )

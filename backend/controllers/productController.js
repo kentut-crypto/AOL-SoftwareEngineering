@@ -12,7 +12,7 @@ const Review = require("../models/reviewModel")
 const getAllProducts = async (req, res) => {
     try {
         const page = Math.max(parseInt(req.query.page) || 1, 1)
-        const limit = 10
+        const limit = 9
         const offset = (page - 1) * limit
         const { minPrice, maxPrice, search, sort, disease } = req.query
 

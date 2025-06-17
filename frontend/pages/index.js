@@ -87,69 +87,75 @@ export default function Marketplace() {
           placeholder="Min Price"
           value={minPrice}
           onChange={e => setMinPrice(e.target.value)}
+          className={styles.filtersInput}
         />
         <input
           type="number"
           placeholder="Max Price"
           value={maxPrice}
           onChange={e => setMaxPrice(e.target.value)}
+          className={styles.filtersInput}
         />
         <input
           type="text"
           placeholder="Search by name"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          className={styles.filtersInput}
         />
-        <div style={{ }}>
+        <div className={styles.diseaseFilterGroup}>
           <label>Filter by Disease</label>
           {diseaseOptions.map(option => (
-            <div key={`filter-${option}`}>
+            <div key={`filter-${option}`} className={styles.diseaseCheckboxItem}>
               <input
                 type="checkbox"
                 id={`filter-${option}`}
                 value={option}
                 checked={filterDiseases.includes(option)}
                 onChange={handleFilterDiseaseCheckboxChange}
+                className={styles.checkboxInput}
               />
               <label htmlFor={`filter-${option}`}>{option}</label>
             </div>
           ))}
         </div>
-        <select value={sort} onChange={e => setSort(e.target.value)}>
+        <select value={sort} onChange={e => setSort(e.target.value)} className={styles.filtersSelect}>
           <option value="">Sort</option>
           <option value="price_asc">Price Low → High</option>
           <option value="price_desc">Price High → Low</option>
           <option value="rating_desc">Rating High → Low</option>
         </select>
-        <button onClick={fetchProducts}>Apply</button>
+        <button onClick={fetchProducts} className={styles.filtersButton}>Apply</button>
       </div>
 
       {products.length === 0 ? (
-        <p>No products found</p>
+        <p className={styles.noProducts}>No products found</p>
       ) : (
         <ul className={styles.grid}>
           {products.map(product => (
             <li key={product.id} className={styles.card}>
-              <Link href={`/product/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+              <Link href={`/product/${product.id}`} className={styles.link}>
                 {product.imageUrl && (
                   <img
                     src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`}
                     alt={product.name}
                   />
                 )}
-                <h2>{product.name}</h2>
-                <p>Price: Rp {Number(product.price).toLocaleString("id-ID")}</p>
-                <div className={styles.seller}>
-                  <img
-                    src={product.seller.imageUrl.startsWith("http")
-                      ? product.seller.imageUrl
-                      : `${process.env.NEXT_PUBLIC_API_URL}${product.seller.imageUrl}`}
-                    alt={product.seller.name}
-                  />
-                  <p>{product.seller.name}</p>
+                <div className={styles.cardContent}>
+                  <h2>{product.name}</h2>
+                  <p className={styles.price}>Price: Rp {Number(product.price).toLocaleString("id-ID")}</p>
+                  <div className={styles.seller}>
+                    <img
+                      src={product.seller.imageUrl.startsWith("http")
+                        ? product.seller.imageUrl
+                        : `${process.env.NEXT_PUBLIC_API_URL}${product.seller.imageUrl}`}
+                      alt={product.seller.name}
+                    />
+                    <p>{product.seller.name}</p>
+                  </div>
+                  {product.rating != null && <p className={styles.rating}>Rating: {product.rating} ★</p>}
+                  <p className={styles.stock}>Stock: {product.stock}</p>
                 </div>
-                {product.rating != null && <p>Rating: {product.rating} ★</p>}
-                <p>Stock: {product.stock}</p>
               </Link>
             </li>
           ))}

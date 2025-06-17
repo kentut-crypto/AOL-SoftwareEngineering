@@ -49,8 +49,8 @@ export default function Orders() {
         }
     }, [user, loading])
 
-    if (loading || loadingOrders) return <p>Loading...</p>
-    if (orders.length === 0) return <p>No incoming orders.</p>
+    if (loading || loadingOrders) return <p className={styles.emptyStateMessage}>Loading orders...</p>
+    if (orders.length === 0) return <p className={styles.emptyStateMessage}>No incoming orders.</p>
 
     return (
         <div className={styles.page}>
