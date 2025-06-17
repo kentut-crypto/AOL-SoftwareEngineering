@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import axiosInstance from "@/axiosInstance"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/router"
+import styles from "../../styles/seller/order.module.css"
 
 export default function Orders() {
     const { user, loading } = useAuth()
@@ -52,28 +53,38 @@ export default function Orders() {
     if (orders.length === 0) return <p>No incoming orders.</p>
 
     return (
-        <div>
-            <h1>Incoming Orders</h1>
+        <div className={styles.page}>
+            <h1 className={styles.heading}>Incoming Orders</h1>
             {orders.map(order => (
-                <div key={order.id}>
-                    <p>Customer: {order.user.name}</p>
+                <div key={order.id} className={styles.orderCard}>
+                    <p className={styles.customer}>Customer: {order.user.name}</p>
                     {order.orderItems.map(item => (
-                        <div key={item.id} style={{ display: "flex", marginBottom: 8 }}>
+                        <div key={item.id} className={styles.orderItem}>
                             <img
                                 src={`${process.env.NEXT_PUBLIC_API_URL}${item.product.imageUrl}`}
                                 alt={item.product.name}
-                                style={{ width: 80, height: 80, objectFit: "cover", marginRight: 12 }}
+                                className={styles.productImage}
                             />
-                            <div>
-                                <p><strong>{item.product.name}</strong></p>
+                            <div className={styles.productDetails}>
+                                <p className={styles.productName}>{item.product.name}</p>
                                 <p>Qty: {item.quantity}</p>
                                 <p>Price: ${item.priceAtPurchase}</p>
-                                <button onClick={() => handleAccept(order.id, item.product.id)} disabled={item.status !== "pending"}>
-                                    Accept
-                                </button>
-                                <button onClick={() => handleDecline(order.id, item.product.id)} disabled={item.status !== "pending"}>
-                                    Decline
-                                </button>
+                                <div className={styles.buttons}>
+                                    <button
+                                        className={styles.acceptButton}
+                                        onClick={() => handleAccept(order.id, item.product.id)}
+                                        disabled={item.status !== "pending"}
+                                    >
+                                        Accept
+                                    </button>
+                                    <button
+                                        className={styles.declineButton}
+                                        onClick={() => handleDecline(order.id, item.product.id)}
+                                        disabled={item.status !== "pending"}
+                                    >
+                                        Decline
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}

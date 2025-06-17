@@ -5,6 +5,8 @@ const Review = require("./reviewModel")
 const CartItem = require("./cartItemModel")
 const OrderItem = require("./orderItemModel")
 const TopUpRequest = require("./topUpRequestModel")
+const ChatRoom = require("./chatRoomModel")
+const Message = require("./messageModel")
 
 // User has many Products
 User.hasMany(Product, { foreignKey: "sellerId", targetKey: "id", as: "products" })
@@ -37,6 +39,15 @@ CartItem.belongsTo(Product, { foreignKey: "productId", targetKey: "id", as: "pro
 
 // TopUpRequest belongs to User
 TopUpRequest.belongsTo(User, { foreignKey: "userId", targetKey: "id", as: "user" })
+
+// Chat
+ChatRoom.belongsTo(User, { as: "User", foreignKey: "userId" })
+ChatRoom.belongsTo(User, { as: "Seller", foreignKey: "sellerId" })
+
+ChatRoom.hasMany(Message, { foreignKey: "chatRoomId" })
+Message.belongsTo(ChatRoom, { foreignKey: "chatRoomId" })
+
+Message.belongsTo(User, { foreignKey: "senderId" })
 
 module.exports = {
   User,
