@@ -5,10 +5,10 @@ const User = require("../models/userModel")
 
 const createOrder = async (req, res) => {
     const userId = req.user.id
-    const { items, totalPrice } = req.body
+    const { items, totalPrice, paymentMethod } = req.body
 
     try {
-        const order = await Order.create({ userId, totalPrice })
+        const order = await Order.create({ userId, totalPrice, paymentMethod })
 
         await Promise.all(items.map(async item => {
             const product = await Product.findByPk(item.productId)

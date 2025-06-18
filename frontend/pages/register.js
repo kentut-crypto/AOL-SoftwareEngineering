@@ -1,7 +1,7 @@
 import { useState } from "react"
 import axiosInstance from "../axiosInstance"
 import { useRouter } from "next/router"
-import styles from "../styles/Register.module.css"
+import styles from "../styles/register.module.css"
 
 export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" })

@@ -90,7 +90,6 @@ const googleFrontendLogin = async (req, res) => {
                 email,
                 googleId,
                 role: "user",
-                imageUrl: picture
             })
         } else {
             if (!user.googleId) {

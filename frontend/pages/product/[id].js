@@ -135,10 +135,13 @@ export default function ProductDetail() {
                         </div>
                     )}
 
-                    <div className={styles.productInfo}>
-                        <p className={styles.productPrice}>{Number(product.price).toLocaleString("id-ID")}</p>
-                        
+                    <div className={styles.productInfo}>    
                         <div className={styles.productDetails}>
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Price:</span>
+                                <span className={styles.detailValue}>{Number(product.price).toLocaleString("id-ID")}</span>
+                            </div>
+
                             <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>Stock:</span>
                                 <span className={styles.detailValue}>{product.stock}</span>

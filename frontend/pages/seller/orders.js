@@ -68,7 +68,7 @@ export default function Orders() {
                             <div className={styles.productDetails}>
                                 <p className={styles.productName}>{item.product.name}</p>
                                 <p>Qty: {item.quantity}</p>
-                                <p>Price: ${item.priceAtPurchase}</p>
+                                <p>Price: Rp {item.priceAtPurchase}</p>
                                 <div className={styles.buttons}>
                                     <button
                                         className={styles.acceptButton}
