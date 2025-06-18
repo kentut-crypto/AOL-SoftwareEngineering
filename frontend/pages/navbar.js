@@ -29,6 +29,7 @@ export default function Navbar() {
             </div>
 
             <ul className={styles.navList}>
+                <Link href="/diseasepredict" className={styles.link}>Predict Disease</Link>
                 {!user ? (
                     <div className={styles.linkGroup}>
                         <Link href="/login" className={styles.link}>Login</Link>
