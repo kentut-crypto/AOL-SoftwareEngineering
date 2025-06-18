@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import axiosInstance from "@/axiosInstance"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useAuth } from "@/context/AuthContext"
+import styles from "../../styles/marketplace.module.css"
+import FilterDiseaseModal from "@/components/FilterDiseaseModal"
 
 export default function SellerPage() {
     const { user, loading } = useAuth()
@@ -14,9 +16,12 @@ export default function SellerPage() {
     const [maxPrice, setMaxPrice] = useState("")
     const [search, setSearch] = useState("")
     const [sort, setSort] = useState("")
-    const [disease, setDisease] = useState("")
+    const [filterDiseases, setFilterDiseases] = useState([])
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
+    const [readyToFetch, setReadyToFetch] = useState(false)
+    const [diseaseModalVisible, setDiseaseModalVisible] = useState(false)
+    const hasInitialUrlFilterBeenApplied = useRef(false)
 
     useEffect(() => {
         if (!loading && user?.role === "admin") {
@@ -24,14 +29,15 @@ export default function SellerPage() {
         }
     }, [loading, user, router])
 
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async () => {
+        if (!id) return
         try {
             const params = { page }
             if (minPrice) params.minPrice = minPrice
             if (maxPrice) params.maxPrice = maxPrice
             if (search) params.search = search
             if (sort) params.sort = sort
-            if (disease) params.disease = disease
+            if (filterDiseases.length > 0) params.disease = filterDiseases.join(',')
 
             const res = await axiosInstance.get(`/products/seller/${id}`, { params })
             setProducts(res.data.data)
@@ -43,82 +49,160 @@ export default function SellerPage() {
         } catch (error) {
             console.error("Failed to fetch products", error)
         }
-    }
+    }, [id, page, minPrice, maxPrice, search, sort, filterDiseases])
 
     useEffect(() => {
-        if (id) fetchProducts()
-    }, [id, page, sort])
+        if (!router.isReady || hasInitialUrlFilterBeenApplied.current) return
+
+        const { minPrice, maxPrice, search, sort, disease, page } = router.query
+
+        if (minPrice) setMinPrice(String(minPrice))
+        if (maxPrice) setMaxPrice(String(maxPrice))
+        if (search) setSearch(String(search))
+        if (sort) setSort(String(sort))
+        if (disease) {
+            const diseasesFromUrl = String(disease).split(',').map(d => d.trim()).filter(Boolean)
+            setFilterDiseases(diseasesFromUrl)
+        }
+        if (page) setPage(Number(page))
+
+        hasInitialUrlFilterBeenApplied.current = true
+        setReadyToFetch(true)
+    }, [router.isReady, router.query])
+
+    useEffect(() => {
+        if (!hasInitialUrlFilterBeenApplied.current) return
+
+        const query = {}
+
+        if (minPrice) query.minPrice = minPrice
+        if (maxPrice) query.maxPrice = maxPrice
+        if (search) query.search = search
+        if (sort) query.sort = sort
+        if (filterDiseases.length > 0) query.disease = filterDiseases.join(',')
+        if (page !== 1) query.page = String(page)
+
+        router.replace({
+            pathname: `/seller/${id}`,
+            query
+        }, undefined, { shallow: true })
+    }, [minPrice, maxPrice, search, sort, filterDiseases, page])
+
+    useEffect(() => {
+        if (readyToFetch && id) {
+            fetchProducts()
+        }
+    }, [readyToFetch, page, sort, minPrice, maxPrice, search, filterDiseases])
 
     if (loading || user?.role === "admin") return null
 
     return (
-        <main style={{ padding: "1rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <main className={styles.main}>
+            <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 30}}>
                 {seller?.imageUrl && (
                     <img
-                        src={`${process.env.NEXT_PUBLIC_API_URL}${seller.imageUrl}`}
+                        src={seller.imageUrl.startsWith("http") ? seller.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${seller.imageUrl}`}
                         alt={seller.name}
-                        style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover" }}
+                        style={{width: 40, height: 40}}
                     />
                 )}
-                <h1>{seller?.name || "Seller"}'s Shop</h1>
+                <h1 className={styles.sellerTitle}>{seller?.name || "Seller"}'s Shop</h1>
             </div>
 
-            <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                <input type="number" placeholder="Min Price" value={minPrice} onChange={e => setMinPrice(e.target.value)} />
-                <input type="number" placeholder="Max Price" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
-                <input type="text" placeholder="Search by name" value={search} onChange={e => setSearch(e.target.value)} />
-                <input type="text" placeholder="Disease target" value={disease} onChange={e => setDisease(e.target.value)} />
-                <select value={sort} onChange={e => setSort(e.target.value)}>
+            <div className={styles.filters}>
+                <input
+                    type="number"
+                    placeholder="Min Price"
+                    value={minPrice}
+                    onChange={e => setMinPrice(e.target.value)}
+                    className={styles.filtersInput}
+                />
+                <input
+                    type="number"
+                    placeholder="Max Price"
+                    value={maxPrice}
+                    onChange={e => setMaxPrice(e.target.value)}
+                    className={styles.filtersInput}
+                />
+                <input
+                    type="text"
+                    placeholder="Search by name"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className={styles.filtersInput}
+                />
+                <button onClick={() => setDiseaseModalVisible(true)} className={styles.filtersButton}>
+                    {filterDiseases.length > 0 ? `${filterDiseases.length} selected` : "Select Diseases"}
+                </button>
+
+                <FilterDiseaseModal
+                    visible={diseaseModalVisible}
+                    selectedDiseases={filterDiseases}
+                    onApply={setFilterDiseases}
+                    onClose={() => setDiseaseModalVisible(false)}
+                />
+                <select value={sort} onChange={e => setSort(e.target.value)} className={styles.filtersSelect}>
                     <option value="">Sort</option>
                     <option value="price_asc">Price Low → High</option>
                     <option value="price_desc">Price High → Low</option>
                     <option value="rating_desc">Rating High → Low</option>
                 </select>
-                <button onClick={fetchProducts}>Apply</button>
+                <button onClick={fetchProducts} className={styles.filtersButton}>Apply</button>
             </div>
 
             {products.length === 0 ? (
-                <p>No products found</p>
+                <p className={styles.noProducts}>No products found</p>
             ) : (
-                <ul style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                    gap: "1rem"
-                }}>
+                <ul className={styles.grid}>
                     {products.map(product => (
-                        <li key={product.id} style={{ border: "1px solid #ccc", borderRadius: "4px", padding: "1rem" }}>
-                            <Link href={`/product/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                        <li key={product.id} className={styles.card}>
+                            <Link href={`/product/${product.id}`} className={styles.link}>
                                 {product.imageUrl && (
-                                    <div style={{ marginBottom: "0.5rem" }}>
-                                        <img
-                                            src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`}
-                                            alt={product.name}
-                                            style={{ width: "100%", height: "200px", objectFit: "cover" }}
-                                        />
-                                    </div>
+                                    <img
+                                        src={`${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`}
+                                        alt={product.name}
+                                    />
                                 )}
-                                <h2>{product.name}</h2>
-                                <p>Price: Rp {Number(product.price).toLocaleString("id-ID")}</p>
-                                {product.rating != null && <p>Rating: {product.rating} ★</p>}
-                                <p>Stock: {product.stock}</p>
+                                <div className={styles.cardContent}>
+                                    <h2>{product.name}</h2>
+                                    <p className={styles.price}>Price: Rp {Number(product.price).toLocaleString("id-ID")}</p>
+                                    <div className={styles.seller}>
+                                        <img
+                                            src={product.seller.imageUrl.startsWith("http")
+                                                ? product.seller.imageUrl
+                                                : `${process.env.NEXT_PUBLIC_API_URL}${product.seller.imageUrl}`}
+                                            alt={product.seller.name}
+                                        />
+                                        <p>{product.seller.name}</p>
+                                    </div>
+                                    {product.rating != null && <p className={styles.rating}>Rating: {product.rating} ★</p>}
+                                    <p className={styles.stock}>Stock: {product.stock}</p>
+                                </div>
                             </Link>
                         </li>
                     ))}
                 </ul>
             )}
 
-            <div style={{ marginTop: "2rem", textAlign: "center" }}>
-                <button onClick={() => setPage(p => Math.max(p - 1, 1))} disabled={page === 1}>
-                    Prev
-                </button>
-                <span style={{ margin: "0 1rem" }}>
-                    Page {page} of {totalPages}
-                </span>
-                <button onClick={() => setPage(p => Math.min(p + 1, totalPages))} disabled={page === totalPages}>
-                    Next
-                </button>
-            </div>
+            {totalPages > 0 && (
+                <div className={styles.pagination}>
+                    <button
+                        onClick={() => setPage(p => Math.max(p - 1, 1))}
+                        disabled={page === 1}
+                    >
+                        Prev
+                    </button>
+                    <span>
+                        Page {page} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                        disabled={page === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </main>
     )
 }

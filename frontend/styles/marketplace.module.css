@@ -16,6 +16,13 @@
   text-align: center;
 }
 
+.sellerTitle {
+  font-size: 2.5rem;
+  color: #14532d;
+  font-weight: 700;
+  text-align: center;
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -362,6 +369,7 @@
   margin-bottom: 0;
   font-weight: normal;
   color: #475569;
+  user-select: none;
 }
 
 .formGroup input[type="file"] {
