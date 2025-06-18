@@ -125,23 +125,25 @@ export default function SellerProducts() {
                 ))}
             </ul>
 
-            <div className={styles.pagination}>
-                <button
-                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
-                    disabled={page === 1}
-                >
-                    Previous
-                </button>
-
-                <span> Page {page} of {totalPages} </span>
-
-                <button
-                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={page === totalPages}
-                >
-                    Next
-                </button>
-            </div>
+            {totalPages > 0 && (
+                <div className={styles.pagination}>
+                    <button
+                        onClick={() => setPage(p => Math.max(p - 1, 1))}
+                        disabled={page === 1}
+                    >
+                        Prev
+                    </button>
+                    <span>
+                        Page {page} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                        disabled={page === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
 
             <SellerProductModal
                 isOpen={modalOpen}

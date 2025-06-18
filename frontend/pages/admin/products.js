@@ -3,6 +3,7 @@ import axiosInstance from "@/axiosInstance";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import styles from '../../styles/admin/adminProducts.module.css';
+import FilterDiseaseModal from "@/components/FilterDiseaseModal";
 
 export default function AdminProductsPage() {
     const { user, loading } = useAuth();
@@ -15,6 +16,7 @@ export default function AdminProductsPage() {
     const [filterDiseases, setFilterDiseases] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [diseaseModalVisible, setDiseaseModalVisible] = useState(false)
 
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState({
@@ -28,7 +30,15 @@ export default function AdminProductsPage() {
         image: null
     });
 
-    const diseaseOptions = ["Blight", "Common Rust", "Gray Leaf Spot"];
+    const diseaseOptions = ['Apple - Apple scab', 'Apple - Black rot', 'Apple - Cedar apple rust',
+        'Cherry (including sour) - Powdery mildew', 'Corn (maize) - Cercospora leaf spot Gray leaf spot',
+        'Corn (maize) - Common rust ', 'Corn (maize) - Northern Leaf Blight', 'Grape - Black rot',
+        'Grape - Esca (Black Measles)', 'Grape - Leaf blight (Isariopsis Leaf Spot)',
+        'Orange - Haunglongbing (Citrus greening)', 'Peach - Bacterial spot', 'Pepper, bell - Bacterial spot',
+        'Potato - Early blight', 'Potato - Late blight', 'Squash - Powdery mildew', 'Strawberry - Leaf scorch',
+        'Tomato - Bacterial spot', 'Tomato - Early blight', 'Tomato - Late blight', 'Tomato - Leaf Mold',
+        'Tomato - Septoria leaf spot', 'Tomato - Spider mites Two-spotted spider mite', 'Tomato - Target Spot',
+        'Tomato - Tomato Yellow Leaf Curl Virus', 'Tomato - Tomato mosaic virus']
 
     const fetchProducts = async () => {
         try {
@@ -106,17 +116,6 @@ export default function AdminProductsPage() {
         });
     };
 
-    const handleFilterDiseaseCheckboxChange = (e) => {
-        const { value, checked } = e.target;
-        setFilterDiseases(prevFilterDiseases => {
-            if (checked) {
-                return [...new Set([...prevFilterDiseases, value])];
-            } else {
-                return prevFilterDiseases.filter(d => d !== value);
-            }
-        });
-    };
-
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -184,22 +183,16 @@ export default function AdminProductsPage() {
                     onChange={e => setSearch(e.target.value)}
                     className={styles.filtersInput}
                 />
-                <div className={styles.diseaseFilterGroup}>
-                    <label>Filter by Disease</label>
-                    {diseaseOptions.map(option => (
-                        <div key={`filter-${option}`} className={styles.diseaseCheckboxItem}>
-                            <input
-                                type="checkbox"
-                                id={`filter-${option}`}
-                                value={option}
-                                checked={filterDiseases.includes(option)}
-                                onChange={handleFilterDiseaseCheckboxChange}
-                                className={styles.checkboxInput}
-                            />
-                            <label htmlFor={`filter-${option}`}>{option}</label>
-                        </div>
-                    ))}
-                </div>
+                <button onClick={() => setDiseaseModalVisible(true)} className={styles.filtersButton}>
+                    {filterDiseases.length > 0 ? `${filterDiseases.length} selected` : "Select Diseases"}
+                </button>
+
+                <FilterDiseaseModal
+                    visible={diseaseModalVisible}
+                    selectedDiseases={filterDiseases}
+                    onApply={setFilterDiseases}
+                    onClose={() => setDiseaseModalVisible(false)}
+                />
                 <select value={sort} onChange={e => setSort(e.target.value)} className={styles.filtersSelect}>
                     <option value="">Sort</option>
                     <option value="price_asc">Price Low → High</option>
@@ -245,17 +238,25 @@ export default function AdminProductsPage() {
                 </ul>
             )}
 
-            <div className={styles.pagination}>
-                <button onClick={() => setPage(p => Math.max(p - 1, 1))} disabled={page === 1}>
-                    Previous
-                </button>
-                <span>
-                    Page {page} of {totalPages}
-                </span>
-                <button onClick={() => setPage(p => Math.min(p + 1, totalPages))} disabled={page === totalPages}>
-                    Next
-                </button>
-            </div>
+            {totalPages > 0 && (
+                <div className={styles.pagination}>
+                    <button
+                        onClick={() => setPage(p => Math.max(p - 1, 1))}
+                        disabled={page === 1}
+                    >
+                        Prev
+                    </button>
+                    <span>
+                        Page {page} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                        disabled={page === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
 
             {editingProduct && (
                 <div className={styles.modalOverlay}>

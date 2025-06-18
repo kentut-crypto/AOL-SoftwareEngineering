@@ -17,7 +17,15 @@ export default function SellerProductModal({
     const [diseaseTargets, setDiseaseTargets] = useState(initial.diseaseTargets || [])
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState(initial.imageUrl)
-    const diseaseOptions = ["Blight", "Common Rust", "Gray Leaf Spot"]
+    const diseaseOptions = ['Apple - Apple scab', 'Apple - Black rot', 'Apple - Cedar apple rust',
+        'Cherry (including sour) - Powdery mildew', 'Corn (maize) - Cercospora leaf spot Gray leaf spot',
+        'Corn (maize) - Common rust ', 'Corn (maize) - Northern Leaf Blight', 'Grape - Black rot',
+        'Grape - Esca (Black Measles)', 'Grape - Leaf blight (Isariopsis Leaf Spot)',
+        'Orange - Haunglongbing (Citrus greening)', 'Peach - Bacterial spot', 'Pepper, bell - Bacterial spot',
+        'Potato - Early blight', 'Potato - Late blight', 'Squash - Powdery mildew', 'Strawberry - Leaf scorch',
+        'Tomato - Bacterial spot', 'Tomato - Early blight', 'Tomato - Late blight', 'Tomato - Leaf Mold',
+        'Tomato - Septoria leaf spot', 'Tomato - Spider mites Two-spotted spider mite', 'Tomato - Target Spot',
+        'Tomato - Tomato Yellow Leaf Curl Virus', 'Tomato - Tomato mosaic virus']
 
     useEffect(() => {
         setName(initial.name)

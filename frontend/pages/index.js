@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useAuth } from "@/context/AuthContext"
 import styles from "../styles/marketplace.module.css"
+import FilterDiseaseModal from "@/components/FilterDiseaseModal"
 
 export default function Marketplace() {
   const { user, loading } = useAuth()
@@ -16,7 +17,9 @@ export default function Marketplace() {
   const [filterDiseases, setFilterDiseases] = useState([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const diseaseOptions = ["Blight", "Common Rust", "Gray Leaf Spot"]
+  const [readyToFetch, setReadyToFetch] = useState(false)
+  const [diseaseModalVisible, setDiseaseModalVisible] = useState(false)
+  
   const hasInitialUrlFilterBeenApplied = useRef(false)
 
   useEffect(() => {
@@ -45,35 +48,44 @@ export default function Marketplace() {
   }, [page, minPrice, maxPrice, search, sort, filterDiseases])
 
   useEffect(() => {
-    if (router.isReady && !hasInitialUrlFilterBeenApplied.current) {
-      const { disease } = router.query
-      if (disease) {
-        const diseasesFromUrl = String(disease).split(',').map(d => d.trim()).filter(Boolean)
-        setFilterDiseases(diseasesFromUrl)
-        fetchProducts()
-      } else {
-        fetchProducts()
-      }
-      hasInitialUrlFilterBeenApplied.current = true
+    if (!router.isReady || hasInitialUrlFilterBeenApplied.current) return
+
+    const { minPrice, maxPrice, search, sort, disease, page } = router.query
+
+    if (minPrice) setMinPrice(String(minPrice))
+    if (maxPrice) setMaxPrice(String(maxPrice))
+    if (search) setSearch(String(search))
+    if (sort) setSort(String(sort))
+    if (disease) {
+      const diseasesFromUrl = String(disease).split(',').map(d => d.trim()).filter(Boolean)
+      setFilterDiseases(diseasesFromUrl)
     }
-  }, [router.isReady, router.query.disease, fetchProducts])
+    if (page) setPage(Number(page))
+
+    hasInitialUrlFilterBeenApplied.current = true
+    setReadyToFetch(true)
+  }, [router.isReady, router.query])
 
   useEffect(() => {
-    if (hasInitialUrlFilterBeenApplied.current) {
+    if (!hasInitialUrlFilterBeenApplied.current) return
+
+    const query = {}
+
+    if (minPrice) query.minPrice = minPrice
+    if (maxPrice) query.maxPrice = maxPrice
+    if (search) query.search = search
+    if (sort) query.sort = sort
+    if (filterDiseases.length > 0) query.disease = filterDiseases.join(',')
+    if (page !== 1) query.page = String(page)
+
+    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true })
+  }, [minPrice, maxPrice, search, sort, filterDiseases, page])
+
+  useEffect(() => {
+    if (readyToFetch) {
       fetchProducts()
     }
-  }, [page, sort])
-
-  const handleFilterDiseaseCheckboxChange = (e) => {
-    const { value, checked } = e.target
-    setFilterDiseases(prevFilterDiseases => {
-      if (checked) {
-        return [...new Set([...prevFilterDiseases, value])]
-      } else {
-        return prevFilterDiseases.filter(d => d !== value)
-      }
-    })
-  }
+  }, [readyToFetch, page, sort, minPrice, maxPrice, search, filterDiseases])
 
   if (loading || user?.role === "admin") return null
 
@@ -103,22 +115,16 @@ export default function Marketplace() {
           onChange={e => setSearch(e.target.value)}
           className={styles.filtersInput}
         />
-        <div className={styles.diseaseFilterGroup}>
-          <label>Filter by Disease</label>
-          {diseaseOptions.map(option => (
-            <div key={`filter-${option}`} className={styles.diseaseCheckboxItem}>
-              <input
-                type="checkbox"
-                id={`filter-${option}`}
-                value={option}
-                checked={filterDiseases.includes(option)}
-                onChange={handleFilterDiseaseCheckboxChange}
-                className={styles.checkboxInput}
-              />
-              <label htmlFor={`filter-${option}`}>{option}</label>
-            </div>
-          ))}
-        </div>
+        <button onClick={() => setDiseaseModalVisible(true)} className={styles.filtersButton}>
+          {filterDiseases.length > 0 ? `${filterDiseases.length} selected` : "Select Diseases"}
+        </button>
+
+        <FilterDiseaseModal
+          visible={diseaseModalVisible}
+          selectedDiseases={filterDiseases}
+          onApply={setFilterDiseases}
+          onClose={() => setDiseaseModalVisible(false)}
+        />
         <select value={sort} onChange={e => setSort(e.target.value)} className={styles.filtersSelect}>
           <option value="">Sort</option>
           <option value="price_asc">Price Low → High</option>
@@ -162,17 +168,25 @@ export default function Marketplace() {
         </ul>
       )}
 
-      <div className={styles.pagination}>
-        <button onClick={() => setPage(p => Math.max(p - 1, 1))} disabled={page === 1}>
-          Prev
-        </button>
-        <span>
-          Page {page} of {totalPages}
-        </span>
-        <button onClick={() => setPage(p => Math.min(p + 1, totalPages))} disabled={page === totalPages}>
-          Next
-        </button>
-      </div>
+      {totalPages > 0 && (
+        <div className={styles.pagination}>
+          <button
+            onClick={() => setPage(p => Math.max(p - 1, 1))}
+            disabled={page === 1}
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+            disabled={page === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </main>
   )
 }

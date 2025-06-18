@@ -1,7 +1,7 @@
 import { useRouter } from "next/router"
 import React, { useState } from "react"
 
-export default function DiseasePreict() {
+export default function DiseasePredict() {
     const router = useRouter()
     const [selectedFile, setSelectedFile] = useState(null)
     const [predictionResult, setPredictionResult] = useState(null)
@@ -57,7 +57,7 @@ export default function DiseasePreict() {
     }
 
     const handleFindMedicine = () => {
-        if (predictionResult && predictionResult.predicted_class !== "Healthy") {
+        if (predictionResult && !predictionResult.predicted_class.toLowerCase().includes("healthy")) {
             const diseaseToFilter = predictionResult.predicted_class
             router.push(`/?disease=${encodeURIComponent(diseaseToFilter)}`)
         }
@@ -127,7 +127,7 @@ export default function DiseasePreict() {
                         ))}
                     </ul>
 
-                    {predictionResult.predicted_class !== "Healthy" && (
+                    {!predictionResult.predicted_class.toLowerCase().includes("healthy") && (
                         <button
                             onClick={handleFindMedicine}
                             style={{
