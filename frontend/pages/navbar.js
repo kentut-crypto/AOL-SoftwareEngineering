@@ -39,6 +39,7 @@ export default function Navbar() {
                         <Link href="/admin/products" className={styles.link}>Products</Link>
                         <Link href="/admin/users" className={styles.link}>Users</Link>
                         <Link href="/admin/topups" className={styles.link}>Top-Ups</Link>
+                        <Link href="/admin/payments" className={styles.link}>Payment Methods</Link>
                         <button onClick={handleLogout} className={styles.button} >Logout</button>
                     </div>
                 ) : (

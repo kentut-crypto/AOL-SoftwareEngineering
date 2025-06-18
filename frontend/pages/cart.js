@@ -12,6 +12,8 @@ export default function CartPage() {
     const [total, setTotal] = useState(0)
     const [isDebouncing, setIsDebouncing] = useState(false)
     const router = useRouter()
+    const [paymentMethods, setPaymentMethods] = useState([])
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("")
 
     const debounceTimeout = useRef({})
     const calcTimeout = useRef(null)
@@ -27,6 +29,9 @@ export default function CartPage() {
             try {
                 const res = await axiosInstance.get("/cart")
                 setCartItems(res.data.data)
+
+                const res2 = await axiosInstance.get("/payment")
+                setPaymentMethods(res2.data.data)
             } catch (err) {
                 console.error("Failed to fetch cart items", err)
             }
@@ -86,7 +91,8 @@ export default function CartPage() {
 
             await axiosInstance.post("/order", {
                 items: itemsToBuy,
-                totalPrice: total
+                totalPrice: total,
+                paymentMethod: selectedPaymentMethod
             })
 
             await axiosInstance.delete("/cart", {
@@ -94,6 +100,7 @@ export default function CartPage() {
             })
             setCartItems(items => items.filter(i => !checkedItems.includes(i.productId)))
             setCheckedItems([]) 
+            setSelectedPaymentMethod("")
         } catch (err) {
             console.error("Checkout failed", err)
         }
@@ -115,7 +122,7 @@ export default function CartPage() {
         }, 300)
     }, [cartItems, checkedItems, isDebouncing])
 
-    const isCheckoutDisabled = checkedItems.length === 0 || isDebouncing || isCalculatingTotal
+    const isCheckoutDisabled = checkedItems.length === 0 || isDebouncing || isCalculatingTotal || !selectedPaymentMethod
 
     const handleCheckboxChange = (productId, checked) => {
         if (checked) {
@@ -200,6 +207,33 @@ export default function CartPage() {
                     </div>
                 )}
             </div>
+
+            <div style={{ margin: "10px 0" }}>
+                <label htmlFor="payment-method" style={{ marginRight: 8, fontWeight: 500 }}>
+                    Payment Method:
+                </label>
+                <select
+                    id="payment-method"
+                    value={selectedPaymentMethod}
+                    onChange={e => setSelectedPaymentMethod(e.target.value)}
+                    style={{
+                        padding: "6px 12px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                        fontSize: 14,
+                        backgroundColor: "#fff",
+                        cursor: "pointer"
+                    }}
+                >
+                    <option value="">-- Select Payment --</option>
+                    {paymentMethods.map(method => (
+                        <option key={method.id} value={method.name}>
+                            {method.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
             <button 
                 onClick={handleCheckout} 
                 disabled={isCheckoutDisabled}

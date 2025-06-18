@@ -41,6 +41,7 @@ export default function OrderHistory() {
                             <div className={styles.orderHeader}>
                                 <h3 className={styles.orderId}>Order ID: {order.id}</h3>
                                 <p className={styles.totalPrice}>Total Price: Rp {Number(order.totalPrice).toLocaleString("id-ID")}</p>
+                                <p className={styles.totalPrice}>Payment Method : {order.paymentMethod}</p>
                             </div>
                             <ul className={styles.productList}>
                                 {order.products.map(product => (

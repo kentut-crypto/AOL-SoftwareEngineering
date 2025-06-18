@@ -10,6 +10,8 @@ const cartItemRoutes = require("./routes/cartItemRoutes")
 const orderRoutes = require("./routes/orderRoutes")
 const topUpRoutes = require("./routes/topUpRequestRoutes")
 const chatRoutes = require("./routes/chatRoutes")
+const paymentRoutes = require("./routes/paymentMethodRoutes")
+const seeding = require("./seed/seed")
 const path = require("path")
 const cookieParser = require("cookie-parser")
 const http = require("http")
@@ -41,6 +43,7 @@ app.use("/api/cart", cartItemRoutes)
 app.use("/api/order", orderRoutes)
 app.use("/api/topup", topUpRoutes)
 app.use("/api/chat", chatRoutes)
+app.use("/api/payment", paymentRoutes)
 
 require("./models")
 
@@ -49,6 +52,8 @@ sequelize.authenticate()
         console.log("Connection has been established successfully.")
 
         await sequelize.sync()
+
+        await seeding()
 
         const PORT = process.env.PORT || 5000
         server.listen(PORT, () => {

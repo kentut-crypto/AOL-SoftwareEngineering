@@ -41,25 +41,23 @@ export default function ChatList() {
 
         socket.on("chatUpdated", (chatUpdate) => {
             setChats((prevChats) => {
-                const updatedChats = prevChats.map((chat) => {
-                    if (chat.id === chatUpdate.id) {
-                        return {
-                            ...chat,
-                            latestMessage: chatUpdate.latestMessage,
-                            unread: chatUpdate.unread,
-                            otherParty: chatUpdate.otherParty,
-                        };
-                    }
-                    return chat;
-                });
-                return updatedChats;
-            });
-        });
+                const existingChat = prevChats.find(chat => chat.id === chatUpdate.id)
+                if (existingChat) {
+                    return prevChats.map(chat =>
+                        chat.id === chatUpdate.id
+                            ? { ...chat, ...chatUpdate }
+                            : chat
+                    )
+                } else {
+                    return [{ ...chatUpdate }, ...prevChats]
+                }
+            })
+        })
 
         return () => {
-            socket.off("chatUpdated");
-        };
-    }, [socket, user]);
+            socket.off("chatUpdated")
+        }
+    }, [socket, user])
 
     if (loading || user?.role === "admin") return null;
 
