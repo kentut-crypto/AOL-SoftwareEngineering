@@ -14,8 +14,16 @@ export default function ChatPage() {
     const [newMsg, setNewMsg] = useState("");
 
     useEffect(() => {
-        if (!loading && user?.role === "admin") {
-            router.replace("/admin/users");
+        if (!loading) {
+            if (!user) {
+                router.replace("/")
+                return
+            }
+
+            if (user?.role === "admin") {
+                router.replace("/admin/users")
+                return
+            }
         }
     }, [loading, user, router]);
 
@@ -51,6 +59,7 @@ export default function ChatPage() {
     };
 
     if (loading || user?.role === "admin") return <p className={styles.loadingOrUnauthorized}>Loading or Unauthorized</p>;
+    if (!user) return null
 
     return (
         <div className={styles.chatContainer}>

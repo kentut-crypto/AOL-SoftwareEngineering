@@ -7,8 +7,7 @@ export default function Navbar() {
     const { user, logout, loading } = useAuth()
 
     const handleLogout = async () => {
-        await axiosInstance.post("/auth/logout")
-        logout()
+        await logout()
     }
 
     return (

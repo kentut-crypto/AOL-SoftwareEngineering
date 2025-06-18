@@ -12,6 +12,11 @@ export default function ChatList() {
     const [chats, setChats] = useState([]);
 
     useEffect(() => {
+        if (!user) {
+            router.replace("/")
+            return
+        }
+
         if (!loading && user?.role === "admin") {
             router.replace("/admin/users");
         }

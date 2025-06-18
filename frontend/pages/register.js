@@ -11,8 +11,31 @@ export default function Register() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
+  const validateForm = () => {
+    const { name, email, password } = form
+
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      alert("All fields are required.")
+      return false
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      alert("Invalid email format.")
+      return false
+    }
+
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters long.")
+      return false
+    }
+
+    return true
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!validateForm()) return
     try {
       await axiosInstance.post("/auth/register", form)
       router.push("/login")
