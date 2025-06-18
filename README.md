@@ -1,19 +1,13 @@
 # AOL_SE
 
+Website e-commerce sederhana untuk pembelian produk obat tanaman / pupuk
+
 # Pre-Requirements
-- Node.js (v18 or later)
-- npm
-- Git
-- PostgreSQL -> https://www.postgresql.org/download/
+[Docker](https://www.docker.com/)
 
-Di .env backend
-DB_NAME=aol_db
-DB_USER=postgres
-DB_PASSWORD=kenneth
-DB_HOST=localhost
+# How to run
+Di subfolder model
+- pip install -r requirements.txt
 
-sesuaikan dengan settingan db kalian
-
-jangan lupa untuk ketik "npm i" di root directory, backend folder, frontend folder
-
-jalanin project pake "node app.js" di backend and "npm run dev" di frontend
+Di root folder
+- docker-compose up --build
