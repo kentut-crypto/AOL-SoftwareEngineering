@@ -394,25 +394,27 @@ export default function ProductDetail() {
                     )}
 
                     {/* pagination */}
-                    <div className={styles.pagination}>
-                        <button 
-                            className={styles.paginationButton}
-                            onClick={() => setReviewPage(p => Math.max(p - 1, 1))} 
-                            disabled={reviewPage === 1}
-                        >
-                            Prev
-                        </button>
-                        <span className={styles.paginationText}>
-                            Page {reviewPage} of {reviewLastPage}
-                        </span>
-                        <button 
-                            className={styles.paginationButton}
-                            onClick={() => setReviewPage(p => Math.min(p + 1, reviewLastPage))} 
-                            disabled={reviewPage === reviewLastPage}
-                        >
-                            Next
-                        </button>
-                    </div>
+                    {reviewLastPage !== 0 && (
+                        <div className={styles.pagination}>
+                            <button
+                                className={styles.paginationButton}
+                                onClick={() => setReviewPage(p => Math.max(p - 1, 1))}
+                                disabled={reviewPage === 1}
+                            >
+                                Prev
+                            </button>
+                            <span className={styles.paginationText}>
+                                Page {reviewPage} of {reviewLastPage}
+                            </span>
+                            <button
+                                className={styles.paginationButton}
+                                onClick={() => setReviewPage(p => Math.min(p + 1, reviewLastPage))}
+                                disabled={reviewPage === reviewLastPage}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
                 </section>
             </main>
         </>

@@ -65,7 +65,7 @@ export default function DiseasePredict() {
 
     return (
         <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
-            <h1 style={{ textAlign: 'center', color: '#333' }}>🌿 Corn Leaf Disease Detector</h1>
+            <h1 style={{ textAlign: 'center', color: '#333' }}>🌿 Leaf Disease Detector</h1>
             <p style={{ textAlign: 'center', color: '#555', marginBottom: '2rem' }}>
                 Upload an image of a corn leaf to detect possible diseases.
             </p>
