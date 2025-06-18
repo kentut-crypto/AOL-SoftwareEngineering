@@ -1,6 +1,6 @@
+"use client"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
-import axiosInstance from "@/axiosInstance"
 import styles from "../styles/navbar.module.css"
 
 export default function Navbar() {
@@ -29,7 +29,9 @@ export default function Navbar() {
             </div>
 
             <ul className={styles.navList}>
-                <Link href="/diseasepredict" className={styles.link}>Predict Disease</Link>
+                {(!user || user.role !== "admin") && (
+                    <Link href="/diseasepredict" className={styles.link}>Predict Disease</Link>
+                )}
                 {!user ? (
                     <div className={styles.linkGroup}>
                         <Link href="/login" className={styles.link}>Login</Link>

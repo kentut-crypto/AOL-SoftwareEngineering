@@ -1,7 +1,7 @@
 import { AuthProvider } from "../context/AuthContext"
 import { GoogleOAuthProvider } from "@react-oauth/google"
-import Navbar from "./navbar"
 import '../styles/global.css';
+import Navbar from "@/components/Navbar"
 
 const App = ({ Component, pageProps }) => {
   return (
