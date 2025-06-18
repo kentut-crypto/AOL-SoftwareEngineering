@@ -8,6 +8,7 @@ Website e-commerce sederhana untuk pembelian produk obat tanaman / pupuk
 # How to run
 Di subfolder model
 - pip install -r requirements.txt
+- python api.py
 
 Di root folder
 - docker-compose up --build
